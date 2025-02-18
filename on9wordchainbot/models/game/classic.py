@@ -312,7 +312,13 @@ class ClassicGame:
             ),
             parse_mode=types.ParseMode.HTML
         )
-
+        if self.turns==50:
+            await self.send_message(
+                (
+                    f"50 words reached. Great 🔥"
+                ),
+                parse_mode=types.ParseMode.HTML
+            )
         # Reset per-turn attributes
         self.answered = False
         self.accepting_answers = True
@@ -484,7 +490,8 @@ class ClassicGame:
         if self.longest_word:
             longest_word_sender_name = [p for p in self.players if p.user_id == self.longest_word_sender_id][0].name
             text += f"Longest word: <i>{self.longest_word.capitalize()}</i> from {longest_word_sender_name}\n"
-        text += f"Game length: <code>{game_len_str}</code>"
+        text += f"Game length: <code>{game_len_str}</code>\n"
+        text += f"Thanks for using the bot made by Ash! @Aswin4122001"
         await self.send_message(text, parse_mode=types.ParseMode.HTML)
 
         GlobalState.games.pop(self.group_id, None)

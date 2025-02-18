@@ -19,8 +19,7 @@ from ..words import Words
 async def cmd_start(message: types.Message) -> None:
     await message.reply(
         (
-            "Hi! I host games of word chain in Telegram groups.\n"
-            "Add me to a group to start playing games!"
+            "Hi! I host games of word chain in Telegram groups and I am made by @Aswin4122001.\n"
         ),
         allow_sending_without_reply=True,
         reply_markup=ADD_TO_GROUP_KEYBOARD
@@ -92,14 +91,13 @@ async def cmd_sql(message: types.Message) -> None:
 async def new_member(message: types.Message) -> None:
     if any(user.id == bot.id for user in message.new_chat_members):  # self added to group
         await message.reply(
-            "Thanks for adding me. Start a classic game with /startclassic!",
+            "Thanks for adding me.\n Ash bot welcomes you!\n Start a classic game with /startclassic!",
             reply=False
         )
     elif message.chat.id == OFFICIAL_GROUP_ID:
         await message.reply(
             (
-                "Welcome to the official On9 Word Chain group!\n"
-                "Start a classic game with /startclassic!"
+                "Welcome to the Word Chain game made by Ash!\n"
             ),
             allow_sending_without_reply=True
         )

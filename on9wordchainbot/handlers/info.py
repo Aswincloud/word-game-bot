@@ -32,12 +32,8 @@ async def cmd_help(message: types.Message) -> None:
             "/troubleshoot - Resolve common issues\n"
             "/reqaddword - Request addition of words\n"
             "/feedback - Send feedback to bot owner\n\n"
-            "You may message [Jono](tg://user?id=463998526) "
-            "in *English / Cantonese* if you have issues with the bot.\n"
-            "Official Group: https://t.me/+T30aTNo-2Xx2kc52\n"
-            "Word Additions Channel (with status updates): @on9wcwa\n"
-            "Source Code: [jonowo/on9wordchainbot](https://github.com/jonowo/on9wordchainbot)\n"
-            "Epic icon designed by [Adri](tg://user?id=303527690)"
+            "You may message [Aswin](tg://user?id=1385954194) "
+            "in *English / Tamil* if you have issues with the bot.\n"
         ),
         allow_sending_without_reply=True
     )
@@ -61,7 +57,7 @@ async def cmd_gameinfo(message: types.Message) -> None:
             "Each player's score is their cumulative word length. "
             "The lowest scoring players are eliminated after each round.\n\n"
             "/startmelim - Mixed elimination game (donation reward)\n"
-            "Elimination game with different modes. Try at the [official group](https://t.me/+T30aTNo-2Xx2kc52)."
+            "Elimination game with different modes."
         ),
         allow_sending_without_reply=True
     )
@@ -84,7 +80,7 @@ async def cmd_troubleshoot(message: types.Message) -> None:
             "\u27a1\ufe0f The bot is likely offline, check @on9wcwa for status updates\n\n"
             "<b>If the bot cannot be added to your group</b>:\n"
             "1. There can be at most 20 bots in a group. Check if this limit is reached.\n\n"
-            "If you encounter other issues, please contact <a href='tg://user?id=463998526'>my owner</a>."
+            "If you encounter other issues, please contact <a href='tg://user?id=1385954194'>my owner</a>."
         ),
         parse_mode=types.ParseMode.HTML,
         allow_sending_without_reply=True
@@ -114,6 +110,7 @@ async def cmd_runinfo(message: types.Message) -> None:
     uptime = datetime.now().replace(microsecond=0) - GlobalState.build_time
     await message.reply(
         (
+            f"Welcome!\nThis game bot has been made by my boss @Aswin4122001\n"
             f"Build time: `{build_time_str}`\n"
             f"Uptime: `{uptime.days}.{str(uptime).rsplit(maxsplit=1)[-1]}`\n"
             f"Words in dictionary: `{Words.count}`\n"
