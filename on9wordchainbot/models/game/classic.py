@@ -462,25 +462,25 @@ class ClassicGame:
             self.time_left -= 1
             if self.time_left > 0:
                 return False
-        if self.time_left == 20:
-            await self.send_message(
-                "20 seconds left!",
-                parse_mode=types.ParseMode.HTML
-            )
-        elif self.time_left == 15:
-            await self.send_message(
-                "15 seconds left!",
-                parse_mode=types.ParseMode.HTML
-            )
-        elif self.time_left == 10:
-            await self.send_message(
-                "10 seconds left!",
-                parse_mode=types.ParseMode.HTML
-            )
-        elif self.time_left == 5:
-            await self.send_message(
-                "5 seconds left!",
-                parse_mode=types.ParseMode.HTML
+            if self.time_left == 20:
+                self.send_message(
+                    "20 seconds left!",
+                    parse_mode=types.ParseMode.HTML
+                )
+            elif self.time_left == 15:
+                self.send_message(
+                    "15 seconds left!",
+                    parse_mode=types.ParseMode.HTML
+                )
+            elif self.time_left == 10:
+                self.send_message(
+                    "10 seconds left!",
+                    parse_mode=types.ParseMode.HTML
+                )
+            elif self.time_left == 5:
+                self.send_message(
+                    "5 seconds left!",
+                    parse_mode=types.ParseMode.HTML
             )
             # Timer ran out
             self.accepting_answers = False
