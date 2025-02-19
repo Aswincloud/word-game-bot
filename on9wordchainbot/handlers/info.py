@@ -16,16 +16,6 @@ from ..words import Words
 @dp.message_handler(CommandStart("help"), ChatTypeFilter([types.ChatType.PRIVATE]))
 @dp.message_handler(CommandHelp())
 async def cmd_help(message: types.Message) -> None:
-    if message.chat.id < 0:
-        await message.reply(
-            "Please use this command in private.",
-            allow_sending_without_reply=True,
-            reply_markup=inline_keyboard_from_button(
-                types.InlineKeyboardButton("Help message", url=await get_start_link("help"))
-            )
-        )
-        return
-
     await message.reply(
         (
             "/gameinfo - Game mode descriptions\n"
@@ -40,7 +30,6 @@ async def cmd_help(message: types.Message) -> None:
 
 
 @dp.message_handler(commands="gameinfo")
-@send_private_only_message
 async def cmd_gameinfo(message: types.Message) -> None:
     await message.reply(
         (
@@ -56,8 +45,6 @@ async def cmd_gameinfo(message: types.Message) -> None:
             "/startelim - Elimination game\n"
             "Each player's score is their cumulative word length. "
             "The lowest scoring players are eliminated after each round.\n\n"
-            "/startmelim - Mixed elimination game (donation reward)\n"
-            "Elimination game with different modes."
         ),
         allow_sending_without_reply=True
     )
@@ -77,7 +64,7 @@ async def cmd_troubleshoot(message: types.Message) -> None:
             "3. Someone spammed commands in your group recently "
             "\u27a1\ufe0f The bot is rate limited in your group, wait patiently\n"
             "4. The bot does not respond to <code>/ping</code> "
-            "\u27a1\ufe0f The bot is likely offline, check @on9wcwa for status updates\n\n"
+            "\u27a1\ufe0f The bot is likely offline, check with @Aswin4122001 for status updates\n\n"
             "<b>If the bot cannot be added to your group</b>:\n"
             "1. There can be at most 20 bots in a group. Check if this limit is reached.\n\n"
             "If you encounter other issues, please contact <a href='tg://user?id=1385954194'>my owner</a>."
