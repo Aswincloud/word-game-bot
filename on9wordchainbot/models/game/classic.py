@@ -470,16 +470,17 @@ class ClassicGame:
                     "15 seconds left!",
                     parse_mode=types.ParseMode.HTML
                 )
-            elif self.time_left == 10:
-                await self.send_message(
-                    "10 seconds left!",
-                    parse_mode=types.ParseMode.HTML
-                )
-            elif self.time_left == 5:
-                await self.send_message(
-                    "5 seconds left!",
-                    parse_mode=types.ParseMode.HTML
-                )
+            elif self.time_left <= 10:
+                if hasattr(self, "countdown_message"):  # If the message exists, edit it
+                    await self.countdown_message.edit_text(
+                        f"⏳ {self.time_left} seconds left!",
+                        parse_mode=types.ParseMode.HTML
+                    )
+                else:  # If first time, send a new message and store the message ID
+                    self.countdown_message = await self.send_message(
+                        f"⏳ {self.time_left} seconds left!",
+                        parse_mode=types.ParseMode.HTML
+                    )
             if self.time_left > 0:
                 return False
             
