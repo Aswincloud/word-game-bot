@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Replace with your actual bot token
-TOKEN = "YOUR_BOT_TOKEN"
+TOKEN = "5242935836:AAGmgid41XlaWwb7yw-G1EXJJsJ6r0lfL9c"
 bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())  # Logs all bot interactions
