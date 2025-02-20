@@ -173,9 +173,15 @@ async def deny_authorization(callback_query: types.CallbackQuery):
 @dp.message_handler(is_owner=True, commands="authorize")
 async def cmd_authorize(message: types.Message) -> None:
     args = message.text.split()
-    
+
+    # If the command is sent without an ID, show the correct usage
     if len(args) != 2 or not args[1].isdigit():
-        await message.reply("⚠️ Usage: /authorize <user_or_group_id>", allow_sending_without_reply=True)
+        await message.reply(
+            "⚠️ Usage: `/authorize <user_or_group_id>`\n\n"
+            "Example:\n`/authorize 123456789` (for users)\n`/authorize -987654321` (for groups)",
+            parse_mode=types.ParseMode.MARKDOWN,
+            allow_sending_without_reply=True
+        )
         return
 
     entity_id = int(args[1])
@@ -198,7 +204,7 @@ async def cmd_authorize(message: types.Message) -> None:
             allow_sending_without_reply=True
         )
 
-    except Exception as e:
+    except Exception:
         await message.reply("❌ Invalid ID or bot has no access to this user/group.", allow_sending_without_reply=True)
 
 @dp.message_handler(
