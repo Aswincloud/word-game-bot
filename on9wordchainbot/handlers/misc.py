@@ -133,98 +133,119 @@ async def cmd_restart(message: types.Message) -> None:
     # Kill the current process
     os.kill(os.getpid(), signal.SIGTERM)
 
-@dp.callback_query_handler(lambda c: c.data.startswith("approve_"))
-async def approve_authorization(callback_query: types.CallbackQuery):
-    entity_id = int(callback_query.data.split("_")[1])
-
-    try:
-        entity = await bot.get_chat(entity_id)
-        entity_name = entity.full_name if entity.type == "private" else entity.title
-
-        if entity.type in ["group", "supergroup"]:
-            if entity_id not in AUTHORIZED_ID:
-                AUTHORIZED_ID.append(entity_id)
-                await callback_query.message.edit_text(
-                    f"✅ **Authorized Group:** *{entity_name}* (ID: `{entity_id}`)",
-                    parse_mode=types.ParseMode.MARKDOWN
-                )
-            else:
-                await callback_query.answer("⚠️ This group is already authorized.", show_alert=True)
-        else:
-            if entity_id not in ADMIN_ID:
-                ADMIN_ID.append(entity_id)
-                await callback_query.message.edit_text(
-                    f"✅ **Authorized User:** [{entity_name}](tg://user?id={entity_id}) (ID: `{entity_id}`)",
-                    parse_mode=types.ParseMode.MARKDOWN
-                )
-            else:
-                await callback_query.answer("⚠️ This user is already authorized.", show_alert=True)
-
-    except Exception as e:
-        await callback_query.answer("❌ Failed to authorize.", show_alert=True)
-
-
-@dp.callback_query_handler(lambda c: c.data.startswith("deny_"))
-async def deny_authorization(callback_query: types.CallbackQuery):
-    entity_id = int(callback_query.data.split("_")[1])
-    await callback_query.message.edit_text(f"❌ Authorization request for `{entity_id}` was denied.", parse_mode=types.ParseMode.MARKDOWN)
-
 
 @dp.message_handler(commands="authorize")
 @admin_only
 async def cmd_authorize(message: types.Message) -> None:
-    args = message.text.split()
+    entity_id = None
 
-    # If the command is sent without an ID, show the correct usage
-    if len(args) != 2 or not args[1].isdigit():
+    # If command is used with an ID
+    args = message.text.split()
+    if len(args) == 2 and args[1].isdigit():
+        entity_id = int(args[1])
+
+    # If the message is a reply, get the sender's ID
+    elif message.reply_to_message:
+        entity_id = message.reply_to_message.from_user.id
+
+    # If no valid ID was found, show usage
+    if not entity_id:
         await message.reply(
-            "⚠️ Usage: `/authorize <user_or_group_id>`\n\n"
-            "Example:\n`/authorize 123456789` (for users)\n`/authorize -987654321` (for groups)",
+            "⚠️ Usage: `/authorize <user_or_group_id>` or reply to a user's message with `/authorize`.\n\n"
+            "Example:\n`/authorize 123456789` (for users)\nReply to a message with `/authorize` (to pick ID automatically)",
             parse_mode=types.ParseMode.MARKDOWN,
             allow_sending_without_reply=True
         )
         return
 
-    entity_id = int(args[1])
+    # Check if already authorized
+    if entity_id in ADMIN_ID or entity_id in AUTHORIZED_ID:
+        await message.reply(
+            "✅ This ID is already authorized.", allow_sending_without_reply=True
+        )
+        return
 
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
         entity_name = entity.full_name if entity.type == "private" else entity.title
-
-        # Create inline buttons
-        keyboard = InlineKeyboardMarkup(row_width=2)
-        keyboard.add(
-            InlineKeyboardButton("✅ Approve", callback_data=f"approve_{entity_id}"),
-            InlineKeyboardButton("❌ Deny", callback_data=f"deny_{entity_id}")
-        )
-
-        await message.reply(
-            f"⚡ **Authorize Request**\n\n👤 **Name:** {entity_name}\n🆔 **ID:** `{entity_id}`\n\nDo you want to authorize this user/group?",
-            parse_mode=types.ParseMode.MARKDOWN,
-            reply_markup=keyboard,
-            allow_sending_without_reply=True
-        )
-
     except Exception:
-        await message.reply("❌ Invalid ID or bot has no access to this user/group.", allow_sending_without_reply=True)
+        entity_name = "Unknown"
 
+    # Create confirmation buttons
+    confirm_markup = InlineKeyboardMarkup(row_width=2)
+    confirm_markup.add(
+        InlineKeyboardButton("✅ Confirm", callback_data=f"confirm_authorize:{entity_id}"),
+        InlineKeyboardButton("❌ Cancel", callback_data="cancel_authorize")
+    )
+
+    await message.reply(
+        f"⚠️ Are you sure you want to authorize **{entity_name}** (`{entity_id}`)?",
+        parse_mode=types.ParseMode.MARKDOWN,
+        reply_markup=confirm_markup,
+        allow_sending_without_reply=True
+    )
+
+
+# Callback handler for confirmation
+@dp.callback_query_handler(lambda call: call.data.startswith("confirm_authorize"))
+async def confirm_authorize(callback_query: types.CallbackQuery):
+    entity_id = int(callback_query.data.split(":")[1])
+
+    try:
+        entity = await bot.get_chat(entity_id)  # Fetch user/group details
+        entity_name = entity.full_name if entity.type == "private" else entity.title
+    except Exception:
+        entity_name = "Unknown"
+
+    # Add to authorized list based on type
+    if entity.type == "private":
+        ADMIN_ID.append(entity_id)  # Add user to admin list
+        entity_type = "User"
+    else:
+        AUTHORIZED_ID.append(entity_id)  # Add group to authorized list
+        entity_type = "Group"
+
+    await bot.edit_message_text(
+        f"✅ {entity_type} `{entity_name}` (`{entity_id}`) has been **authorized** successfully.",
+        chat_id=callback_query.message.chat.id,
+        message_id=callback_query.message.message_id,
+        parse_mode=types.ParseMode.MARKDOWN
+    )
+
+
+# Callback handler for canceling authorization
+@dp.callback_query_handler(lambda call: call.data == "cancel_authorize")
+async def cancel_authorize(callback_query: types.CallbackQuery):
+    await bot.edit_message_text(
+        "❌ Authorization cancelled.",
+        chat_id=callback_query.message.chat.id,
+        message_id=callback_query.message.message_id,
+        parse_mode=types.ParseMode.MARKDOWN
+    )
 
 @dp.message_handler(commands="demote")
 @admin_only
 async def cmd_demote(message: types.Message) -> None:
-    args = message.text.split()
+    entity_id = None
 
-    # If the command is sent without an ID, show the correct usage
-    if len(args) != 2 or not args[1].isdigit():
+    # If command is used with an ID
+    args = message.text.split()
+    if len(args) == 2 and args[1].isdigit():
+        entity_id = int(args[1])
+
+    # If the message is a reply, get the sender's ID
+    elif message.reply_to_message:
+        entity_id = message.reply_to_message.from_user.id
+
+    # If no valid ID was found, show usage
+    if not entity_id:
         await message.reply(
-            "⚠️ Usage: `/demote <user_or_group_id>`\n\n"
-            "Example:\n`/demote 123456789` (for users)\n`/demote -987654321` (for groups)",
+            "⚠️ Usage: `/demote <user_or_group_id>` or reply to a user's message with `/demote`.\n\n"
+            "Example:\n`/demote 123456789` (for users)\nReply to a message with `/demote` (to pick ID automatically)",
             parse_mode=types.ParseMode.MARKDOWN,
             allow_sending_without_reply=True
         )
         return
-
-    entity_id = int(args[1])
 
     # Check if ID exists in either the admin or authorized list
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
@@ -292,7 +313,6 @@ async def cancel_demote(callback_query: types.CallbackQuery):
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
     )
-
 
 @dp.message_handler(
     ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
