@@ -1,33 +1,18 @@
-import logging
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
-from aiogram.utils.executor import start_polling
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher.filters import Command
-from misc import *
-# Enable detailed logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Replace with your actual bot token
-TOKEN = "5242935836:AAGmgid41XlaWwb7yw-G1EXJJsJ6r0lfL9c"
-bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
-dp = Dispatcher(bot)
-dp.middleware.setup(LoggingMiddleware())  # Logs all bot interactions
-
+from aiogram import types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from .misc import dp, bot, OWNER_ID, ADMIN_ID, AUTHORIZED_ID, admin_only
 
 # Define callback data format
 demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
 
 @dp.message_handler(commands="demote")
+@admin_only
 async def cmd_demote(message: types.Message) -> None:
-    """Handles /demote command with logging and debug prints."""
-    logger.debug("[DEBUG] Received /demote command")
-    
+    print("[DEBUG] Received /demote command")
     entity_id = None
     admin_id = message.from_user.id  # Admin who initiated the command
-    logger.debug(f"[DEBUG] Admin ID: {admin_id}")
+    print(f"[DEBUG] Admin ID: {admin_id}")
 
     # Extract entity ID from command or reply
     args = message.text.split()
@@ -39,32 +24,29 @@ async def cmd_demote(message: types.Message) -> None:
         elif message.reply_to_message.sender_chat:
             entity_id = message.reply_to_message.sender_chat.id
 
+    print(f"[DEBUG] Target Entity ID: {entity_id}")
+
     if not entity_id:
-        await message.reply(
-            "⚠️ Usage: `/demote <user_or_group_id>` or reply to a user's message with `/demote`.",
-            parse_mode=types.ParseMode.MARKDOWN
-        )
+        await message.reply("⚠️ Invalid usage. Reply to a user or provide an ID.", parse_mode=types.ParseMode.MARKDOWN)
         return
 
-    # Prevent demoting the bot owner
     if entity_id == OWNER_ID:
-        await message.reply("😡 **Don't dare to demote my owner!** 🚀", parse_mode=types.ParseMode.MARKDOWN)
+        await message.reply("😡 You cannot demote the owner!", parse_mode=types.ParseMode.MARKDOWN)
         return
 
-    # Check if the ID is authorized
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
-        await message.reply("❌ This ID is not in the authorized list.")
+        await message.reply("❌ This ID is not in the authorized list.", allow_sending_without_reply=True)
         return
 
     try:
         entity = await bot.get_chat(entity_id)
         entity_name = entity.get_mention(as_html=True) if entity.type == "private" else entity.title
-    except Exception:
+    except Exception as e:
+        print(f"[DEBUG] Error fetching chat: {e}")
         entity_name = "Unknown"
 
-    logger.debug(f"[DEBUG] Sending confirmation message for {entity_name} ({entity_id})")
+    print(f"[DEBUG] Sending confirmation message for {entity_name} ({entity_id})")
 
-    # Confirmation buttons
     confirm_markup = InlineKeyboardMarkup(row_width=2).add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
         InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
@@ -76,16 +58,37 @@ async def cmd_demote(message: types.Message) -> None:
         reply_markup=confirm_markup
     )
 
+
+@dp.callback_query_handler()
+async def catch_all_callbacks(callback_query: types.CallbackQuery):
+    """Logs raw callback data before processing."""
+    print(f"[DEBUG] Raw callback data: {callback_query.data}")
+
+    # Ensure correct callback parsing
+    callback_parts = callback_query.data.split(":")
+    if callback_parts[0] != "demote":
+        print("[DEBUG] Callback does not match 'demote' prefix. Ignoring.")
+        return
+
+    action = callback_parts[1]
+    entity_id = callback_parts[2]
+    admin_id = callback_parts[3]
+
+    print(f"[DEBUG] Parsed Callback - Action: {action}, Entity ID: {entity_id}, Admin ID: {admin_id}")
+
+
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
 async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dict):
-    """Handles confirmation of demotion."""
-    logger.debug("[DEBUG] Confirm button clicked!")
-    logger.debug(f"[DEBUG] Callback Data: {callback_data}")
+    """Handles demotion confirmation."""
+    print("[DEBUG] Confirm demote triggered")
 
     entity_id = int(callback_data["entity_id"])
     admin_id = int(callback_data["admin_id"])
 
+    print(f"[DEBUG] Entity ID: {entity_id}, Admin ID: {admin_id}")
+
     if callback_query.from_user.id != admin_id:
+        print("[DEBUG] Unauthorized confirm attempt")
         await bot.answer_callback_query(callback_query.id, "🚫 You are not allowed to confirm this action!", show_alert=True)
         return
 
@@ -96,14 +99,14 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     try:
         entity = await bot.get_chat(entity_id)
         entity_name = entity.get_mention(as_html=True) if entity.type == "private" else entity.title
-    except Exception:
+    except Exception as e:
+        print(f"[DEBUG] Error fetching chat: {e}")
         entity_name = "Unknown"
 
-    logger.debug(f"[DEBUG] Demoting {entity_name} ({entity_id})...")
-
-    # Remove from admin lists
     ADMIN_ID.discard(entity_id)
     AUTHORIZED_ID.discard(entity_id)
+
+    print(f"[DEBUG] {entity_name} ({entity_id}) demoted successfully")
 
     await bot.edit_message_text(
         f"❌ User {entity_name} (`{entity_id}`) has been **demoted** successfully.",
@@ -113,15 +116,16 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     )
     await bot.answer_callback_query(callback_query.id)
 
+
 @dp.callback_query_handler(demote_callback.filter(action="cancel"))
 async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
     """Handles cancellation of demotion."""
-    logger.debug("[DEBUG] Cancel button clicked!")
-    logger.debug(f"[DEBUG] Callback Data: {callback_data}")
+    print("[DEBUG] Cancel demote triggered")
 
     admin_id = int(callback_data["admin_id"])
 
     if callback_query.from_user.id != admin_id:
+        print("[DEBUG] Unauthorized cancel attempt")
         await bot.answer_callback_query(callback_query.id, "🚫 You are not allowed to cancel this action!", show_alert=True)
         return
 
@@ -132,17 +136,3 @@ async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict
         parse_mode=types.ParseMode.MARKDOWN
     )
     await bot.answer_callback_query(callback_query.id)
-
-@dp.callback_query_handler()
-async def catch_all_callbacks(callback_query: types.CallbackQuery):
-    """Catches all callback queries for debugging."""
-    logger.debug(f"[DEBUG] Raw callback received: {callback_query.data}")
-    await bot.answer_callback_query(callback_query.id, "✅ Callback received!")
-
-async def on_startup(dispatcher: Dispatcher):
-    """Runs when the bot starts."""
-    logger.info("[DEBUG] Bot started successfully!")
-
-if __name__ == "__main__":
-    logger.info("[DEBUG] Starting bot...")
-    start_polling(dp, on_startup=on_startup)
