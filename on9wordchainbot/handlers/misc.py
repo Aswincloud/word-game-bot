@@ -65,22 +65,44 @@ async def cmd_maintmode(message: types.Message) -> None:
 
 @dp.message_handler(is_owner=True, commands="authorized_users")
 async def cmd_authorized_users(message: types.Message) -> None:
-    users_list = "\n".join(map(str, ADMIN_ID)) if ADMIN_ID else "No authorized users."
+    if not ADMIN_ID:
+        await message.reply("No authorized users.", allow_sending_without_reply=True)
+        return
+
+    user_list = []
+    for user_id in ADMIN_ID:
+        try:
+            user = await bot.get_chat(user_id)  # Fetch user details
+            user_list.append(f"👤 `{user_id}` - [{user.full_name}](tg://user?id={user_id})")
+        except Exception as e:
+            user_list.append(f"👤 `{user_id}` - Name not found")
+
     await message.reply(
-        f"👤 **Authorized Users:**\n{users_list}",
+        f"👤 **Authorized Users:**\n" + "\n".join(user_list),
         parse_mode=types.ParseMode.MARKDOWN,
         allow_sending_without_reply=True
     )
 
 @dp.message_handler(is_owner=True, commands="authorized_groups")
 async def cmd_authorized_groups(message: types.Message) -> None:
-    groups_list = "\n".join(map(str, AUTHORIZED_ID)) if AUTHORIZED_ID else "No authorized groups."
+    if not AUTHORIZED_ID:
+        await message.reply("No authorized groups.", allow_sending_without_reply=True)
+        return
+
+    group_list = []
+    for group_id in AUTHORIZED_ID:
+        try:
+            group = await bot.get_chat(group_id)  # Fetch group details
+            group_list.append(f"📢 `{group_id}` - *{group.title}*")
+        except Exception as e:
+            group_list.append(f"📢 `{group_id}` - Name not found")
+
     await message.reply(
-        f"📢 **Authorized Groups:**\n{groups_list}",
+        f"📢 **Authorized Groups:**\n" + "\n".join(group_list),
         parse_mode=types.ParseMode.MARKDOWN,
         allow_sending_without_reply=True
     )
-    
+
 @dp.message_handler(commands="restart")
 async def cmd_restart(message: types.Message) -> None:
     if message.from_user.id in ADMIN_ID:
