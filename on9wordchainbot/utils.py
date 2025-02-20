@@ -102,7 +102,9 @@ def send_groups_only_message(f: Callable[..., Any]) -> Callable[..., Any]:
         # Check if the group is authorized
         if message.chat.id not in AUTHORIZED_ID:
             await message.reply(
-                "⛔ This group is not authorized to use this command.\nPlease contact my boss @Aswin4122001 to authorize this group {message.chat.id}",
+                f"⛔ This group is not authorized to use this command.\n"
+                f"Please contact my boss @Aswin4122001 to authorize this group: `{message.chat.id}`",
+                parse_mode=types.ParseMode.MARKDOWN,
                 allow_sending_without_reply=True
             )
             return
