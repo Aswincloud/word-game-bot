@@ -5,7 +5,6 @@ from aiogram.utils.exceptions import ChatNotFound
 from .misc import *
 
 # Store admin IDs in a mutable list
-ADMIN_ID = set()  # Change this based on how you store admins
 
 @dp.message_handler(commands="demote")
 @admin_only
