@@ -14,7 +14,7 @@ from aiogram.utils.exceptions import (BadRequest, BotBlocked, BotKicked, CantIni
 
 from .donation import send_donate_invoice
 from .. import GlobalState, bot, dp, pool
-from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP, BOT_DIR, ADMIN_ID, AUTHORIZED_ID
+from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP, BOT_DIR, ADMIN_ID, AUTHORIZED_ID, OWNER_ID
 from ..models import GAME_MODES
 from ..utils import ADD_TO_GROUP_KEYBOARD, amt_donated, is_word, send_admin_group
 from ..words import Words
@@ -247,7 +247,16 @@ async def cmd_demote(message: types.Message) -> None:
         )
         return
 
-    # Check if ID exists in either the admin or authorized list
+    # Prevent demoting the bot owner
+    if entity_id == OWNER_ID:
+        await message.reply(
+            "😡 **Don't dare to demote my owner!** 🚀",
+            parse_mode=types.ParseMode.MARKDOWN,
+            allow_sending_without_reply=True
+        )
+        return
+
+    # Check if the ID is actually authorized
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
         await message.reply(
             "❌ This ID is not in the authorized list.", allow_sending_without_reply=True
@@ -280,14 +289,13 @@ async def cmd_demote(message: types.Message) -> None:
 async def confirm_demote(callback_query: types.CallbackQuery):
     entity_id = int(callback_query.data.split(":")[1])
 
-    if entity_id in ADMIN_ID:
-        ADMIN_ID.remove(entity_id)
-        entity_type = "User"
-    elif entity_id in AUTHORIZED_ID:
-        AUTHORIZED_ID.remove(entity_id)
-        entity_type = "Group"
-    else:
-        await callback_query.answer("❌ This ID is no longer in the authorized list.")
+    # Ensure owner is not demoted (Extra Safety)
+    if entity_id == OWNER_ID:
+        await bot.answer_callback_query(
+            callback_query.id,
+            "🚫 You cannot demote the owner!",
+            show_alert=True
+        )
         return
 
     try:
@@ -296,8 +304,21 @@ async def confirm_demote(callback_query: types.CallbackQuery):
     except Exception:
         entity_name = "Unknown"
 
+    # Remove from authorized lists
+    if entity_id in ADMIN_ID:
+        ADMIN_ID.remove(entity_id)
+        entity_type = "User"
+    elif entity_id in AUTHORIZED_ID:
+        AUTHORIZED_ID.remove(entity_id)
+        entity_type = "Group"
+    else:
+        await bot.answer_callback_query(
+            callback_query.id, "This ID is not authorized.", show_alert=True
+        )
+        return
+
     await bot.edit_message_text(
-        f"✅ {entity_type} `{entity_name}` (`{entity_id}`) has been **demoted** successfully.",
+        f"❌ {entity_type} `{entity_name}` (`{entity_id}`) has been **demoted** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
