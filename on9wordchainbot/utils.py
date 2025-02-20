@@ -7,7 +7,7 @@ from aiocache import cached
 from aiogram import types
 
 from . import bot, on9bot, pool
-from .constants import ADMIN_GROUP_ID, VIP
+from .constants import ADMIN_GROUP_ID, VIP, AUTHORIZED_ID
 from .words import Words
 
 
@@ -91,12 +91,22 @@ def send_private_only_message(f: Callable[..., Any]) -> Callable[..., Any]:
 def send_groups_only_message(f: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(f)
     async def inner(message: types.Message, *args: Any, **kwargs: Any) -> None:
-        if message.chat.id > 0:
+        if message.chat.id > 0:  # If it's a private chat
             await message.reply(
-                "This command can only be used in groups.",
-                allow_sending_without_reply=True, reply_markup=ADD_TO_GROUP_KEYBOARD
+                "🚫 This command can only be used in groups.",
+                allow_sending_without_reply=True,
+                reply_markup=ADD_TO_GROUP_KEYBOARD
             )
             return
+        
+        # Check if the group is authorized
+        if message.chat.id not in AUTHORIZED_ID:
+            await message.reply(
+                "⛔ This group is not authorized to use this command.\nPlease contact my boss @Aswin4122001 to authorize this group {message.chat.id}",
+                allow_sending_without_reply=True
+            )
+            return
+
         await f(message, *args, **kwargs)
 
     return inner
