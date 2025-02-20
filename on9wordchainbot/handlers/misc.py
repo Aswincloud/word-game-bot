@@ -5,6 +5,7 @@ from uuid import uuid4
 from functools import wraps
 import os
 import signal
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from aiogram import types
 from aiogram.dispatcher.filters import ChatTypeFilter, CommandStart
@@ -131,6 +132,74 @@ async def cmd_restart(message: types.Message) -> None:
 
     # Kill the current process
     os.kill(os.getpid(), signal.SIGTERM)
+
+@dp.callback_query_handler(lambda c: c.data.startswith("approve_"))
+async def approve_authorization(callback_query: types.CallbackQuery):
+    entity_id = int(callback_query.data.split("_")[1])
+
+    try:
+        entity = await bot.get_chat(entity_id)
+        entity_name = entity.full_name if entity.type == "private" else entity.title
+
+        if entity.type in ["group", "supergroup"]:
+            if entity_id not in AUTHORIZED_ID:
+                AUTHORIZED_ID.append(entity_id)
+                await callback_query.message.edit_text(
+                    f"✅ **Authorized Group:** *{entity_name}* (ID: `{entity_id}`)",
+                    parse_mode=types.ParseMode.MARKDOWN
+                )
+            else:
+                await callback_query.answer("⚠️ This group is already authorized.", show_alert=True)
+        else:
+            if entity_id not in ADMIN_ID:
+                ADMIN_ID.append(entity_id)
+                await callback_query.message.edit_text(
+                    f"✅ **Authorized User:** [{entity_name}](tg://user?id={entity_id}) (ID: `{entity_id}`)",
+                    parse_mode=types.ParseMode.MARKDOWN
+                )
+            else:
+                await callback_query.answer("⚠️ This user is already authorized.", show_alert=True)
+
+    except Exception as e:
+        await callback_query.answer("❌ Failed to authorize.", show_alert=True)
+
+
+@dp.callback_query_handler(lambda c: c.data.startswith("deny_"))
+async def deny_authorization(callback_query: types.CallbackQuery):
+    entity_id = int(callback_query.data.split("_")[1])
+    await callback_query.message.edit_text(f"❌ Authorization request for `{entity_id}` was denied.", parse_mode=types.ParseMode.MARKDOWN)
+
+
+@dp.message_handler(is_owner=True, commands="authorize")
+async def cmd_authorize(message: types.Message) -> None:
+    args = message.text.split()
+    
+    if len(args) != 2 or not args[1].isdigit():
+        await message.reply("⚠️ Usage: /authorize <user_or_group_id>", allow_sending_without_reply=True)
+        return
+
+    entity_id = int(args[1])
+
+    try:
+        entity = await bot.get_chat(entity_id)  # Fetch user/group details
+        entity_name = entity.full_name if entity.type == "private" else entity.title
+
+        # Create inline buttons
+        keyboard = InlineKeyboardMarkup(row_width=2)
+        keyboard.add(
+            InlineKeyboardButton("✅ Approve", callback_data=f"approve_{entity_id}"),
+            InlineKeyboardButton("❌ Deny", callback_data=f"deny_{entity_id}")
+        )
+
+        await message.reply(
+            f"⚡ **Authorize Request**\n\n👤 **Name:** {entity_name}\n🆔 **ID:** `{entity_id}`\n\nDo you want to authorize this user/group?",
+            parse_mode=types.ParseMode.MARKDOWN,
+            reply_markup=keyboard,
+            allow_sending_without_reply=True
+        )
+
+    except Exception as e:
+        await message.reply("❌ Invalid ID or bot has no access to this user/group.", allow_sending_without_reply=True)
 
 @dp.message_handler(
     ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
