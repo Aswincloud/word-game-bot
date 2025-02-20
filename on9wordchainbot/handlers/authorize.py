@@ -39,6 +39,15 @@ async def cmd_authorize(message: types.Message) -> None:
         )
         return
 
+    # Prevent bot from authorizing itself
+    if entity_id == bot.id:
+        await message.reply(
+            "🤖 I cannot authorize myself!",
+            parse_mode=types.ParseMode.MARKDOWN,
+            allow_sending_without_reply=True
+        )
+        return
+
     # Check if already authorized
     if entity_id in ADMIN_ID or entity_id in AUTHORIZED_ID:
         await message.reply(
@@ -56,8 +65,8 @@ async def cmd_authorize(message: types.Message) -> None:
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
     confirm_markup.add(
-        InlineKeyboardButton("✅ Confirm", callback_data=authorize_callback.new("confirm", entity_id, admin_id)),
-        InlineKeyboardButton("❌ Cancel", callback_data=authorize_callback.new("cancel", entity_id, admin_id))
+        InlineKeyboardButton("✅ Confirm", callback_data=authorize_callback.new(action="confirm", entity_id=entity_id, admin_id=admin_id)),
+        InlineKeyboardButton("❌ Cancel", callback_data=authorize_callback.new(action="cancel", entity_id=entity_id, admin_id=admin_id))
     )
 
     await message.reply(
