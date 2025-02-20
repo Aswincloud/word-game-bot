@@ -44,7 +44,7 @@ async def cmd_authorize(message: types.Message) -> None:
         await message.reply("👑 **The owner is always authorized!** 🚀", parse_mode=types.ParseMode.MARKDOWN)
         return
 
-    if entity_id in AUTHORIZED_ENTITIES:
+    if entity_id in AUTHORIZED_ID or ADMIN_ID:
         await message.reply("✅ This ID is already authorized.")
         return
 
