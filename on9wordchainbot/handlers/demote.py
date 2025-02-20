@@ -1,6 +1,6 @@
 from aiogram.utils.callback_data import CallbackData
 
-from misc import *
+from .misc import *
 
 demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
 

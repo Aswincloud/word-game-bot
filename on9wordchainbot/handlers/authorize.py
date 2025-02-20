@@ -1,4 +1,4 @@
-from misc import *
+from .misc import *
 from aiogram.utils.callback_data import CallbackData
 
 authorize_callback = CallbackData("authorize", "action", "entity_id", "admin_id")
