@@ -12,7 +12,7 @@ from aiogram.utils.exceptions import (BadRequest, BotBlocked, BotKicked, CantIni
 
 from .donation import send_donate_invoice
 from .. import GlobalState, bot, dp, pool
-from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP
+from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP, BOT_DIR
 from ..models import GAME_MODES
 from ..utils import ADD_TO_GROUP_KEYBOARD, amt_donated, is_word, send_admin_group
 from ..words import Words
@@ -71,7 +71,7 @@ async def cmd_restart(message: types.Message) -> None:
     )
     
     # Run git pull to fetch the latest changes
-    subprocess.run(["git", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run(["git", "pull"], cwd=BOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     # Kill the current process
     os.kill(os.getpid(), signal.SIGTERM)

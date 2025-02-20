@@ -22,7 +22,7 @@ VIP = config["VIP"]
 VIP_GROUP = config["VIP_GROUP"]
 
 WORDLIST_SOURCE = "https://raw.githubusercontent.com/dwyl/english-words/master/words.txt"
-
+BOT_DIR = "/home/aswin/on9wordchainbot"
 STAR = "\u2b50\ufe0f"
 
 
