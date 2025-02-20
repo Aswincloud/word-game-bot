@@ -12,7 +12,7 @@ from aiogram.utils.exceptions import (BadRequest, BotBlocked, BotKicked, CantIni
 
 from .donation import send_donate_invoice
 from .. import GlobalState, bot, dp, pool
-from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP, BOT_DIR
+from ..constants import ADMIN_GROUP_ID, GameState, OFFICIAL_GROUP_ID, VIP, BOT_DIR, ADMIN_ID, AUTHORIZED_ID
 from ..models import GAME_MODES
 from ..utils import ADD_TO_GROUP_KEYBOARD, amt_donated, is_word, send_admin_group
 from ..words import Words
@@ -65,21 +65,20 @@ async def cmd_maintmode(message: types.Message) -> None:
 
 @dp.message_handler(is_owner=True, commands="restart")
 async def cmd_restart(message: types.Message) -> None:
-    await message.reply(
-        "Updating and restarting the bot...",
-        allow_sending_without_reply=True
-    )
-    
-    # Run git pull to fetch the latest changes
-    subprocess.run(["git", "pull"], cwd=BOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
-    # Kill the current process
-    os.kill(os.getpid(), signal.SIGTERM)
+    if message.from_user.id in ADMIN_ID:
+        await message.reply(
+            "Updating and restarting the bot...",
+            allow_sending_without_reply=True
+        )
 
-@dp.message_handler(is_owner=False, commands="restart")
-async def cmd__dont_restart(message: types.Message) -> None:
-    await message.reply(
-        "You are not authorized to use this command!",
+        # Run git pull to fetch the latest changes
+        subprocess.run(["git", "pull"], cwd=BOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Kill the current process
+        os.kill(os.getpid(), signal.SIGTERM)
+    else:
+        await message.reply(
+        "⛔ You are not authorized to use this command!",
         allow_sending_without_reply=True
     )
 

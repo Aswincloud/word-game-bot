@@ -19,6 +19,8 @@ ADMIN_GROUP_ID = config["ADMIN_GROUP_ID"]
 OFFICIAL_GROUP_ID = config["OFFICIAL_GROUP_ID"]
 WORD_ADDITION_CHANNEL_ID = config["WORD_ADDITION_CHANNEL_ID"]
 VIP = config["VIP"]
+AUTHORIZED_ID = config["AUTHORIZED_ID"]
+ADMIN_ID = config["ADMIN_ID"]
 VIP_GROUP = config["VIP_GROUP"]
 
 WORDLIST_SOURCE = "https://raw.githubusercontent.com/dwyl/english-words/master/words.txt"
