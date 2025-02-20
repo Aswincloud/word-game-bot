@@ -1,6 +1,8 @@
 import asyncio
 import traceback
 from uuid import uuid4
+import os
+import signal
 
 from aiogram import types
 from aiogram.dispatcher.filters import ChatTypeFilter, CommandStart
@@ -60,6 +62,15 @@ async def cmd_maintmode(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
+@dp.message_handler(is_owner=True, commands="restart")
+async def cmd_restart(message: types.Message) -> None:
+    await message.reply(
+        "Restarting the bot...",
+        allow_sending_without_reply=True
+    )
+    
+    # Kill the current process
+    os.kill(os.getpid(), signal.SIGTERM)
 
 @dp.message_handler(
     ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
