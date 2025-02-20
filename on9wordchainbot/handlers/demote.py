@@ -5,7 +5,7 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.utils.executor import start_polling
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters import Command
-from .misc import *
+from misc import *
 # Enable detailed logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
