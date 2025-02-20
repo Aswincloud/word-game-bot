@@ -233,11 +233,14 @@ async def cmd_demote(message: types.Message) -> None:
     if len(args) == 2 and args[1].isdigit():
         entity_id = int(args[1])
 
-    # If the message is a reply, get the sender's ID
+    # If the command is used as a reply, get the replied user's ID
     elif message.reply_to_message:
-        entity_id = message.reply_to_message.from_user.id
+        if message.reply_to_message.from_user:
+            entity_id = message.reply_to_message.from_user.id
+        elif message.reply_to_message.sender_chat:  # For channels/supergroups
+            entity_id = message.reply_to_message.sender_chat.id
 
-    # If no valid ID was found, show usage
+    # If no valid ID was found, show usage message
     if not entity_id:
         await message.reply(
             "⚠️ Usage: `/demote <user_or_group_id>` or reply to a user's message with `/demote`.\n\n"
