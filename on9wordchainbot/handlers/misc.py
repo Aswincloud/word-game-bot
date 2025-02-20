@@ -76,6 +76,13 @@ async def cmd_restart(message: types.Message) -> None:
     # Kill the current process
     os.kill(os.getpid(), signal.SIGTERM)
 
+@dp.message_handler(is_owner=False, commands="restart")
+async def cmd__dont_restart(message: types.Message) -> None:
+    await message.reply(
+        "You are not authorized to use this command!",
+        allow_sending_without_reply=True
+    )
+
 @dp.message_handler(
     ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
 )
