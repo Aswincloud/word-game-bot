@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import Command
 from aiogram.utils.exceptions import ChatNotFound
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from .misc import *
 
 @dp.message_handler(commands="demote")
 @admin_only
