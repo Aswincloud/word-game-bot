@@ -62,7 +62,7 @@ async def cmd_demote(message: types.Message) -> None:
 @dp.callback_query_handler()
 async def catch_all_callbacks(callback_query: types.CallbackQuery):
     """Logs raw callback data before processing."""
-    print(f"[DEBUG] Raw callback data: {callback_query.data}")
+    print(f"[DEBUG] Button clicked! Callback data received: {callback_query.data}")
 
     # Ensure correct callback parsing
     callback_parts = callback_query.data.split(":")
@@ -80,7 +80,7 @@ async def catch_all_callbacks(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
 async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dict):
     """Handles demotion confirmation."""
-    print("[DEBUG] Confirm demote triggered")
+    print("[DEBUG] ✅ Confirm button clicked!")
 
     entity_id = int(callback_data["entity_id"])
     admin_id = int(callback_data["admin_id"])
@@ -88,7 +88,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     print(f"[DEBUG] Entity ID: {entity_id}, Admin ID: {admin_id}")
 
     if callback_query.from_user.id != admin_id:
-        print("[DEBUG] Unauthorized confirm attempt")
+        print("[DEBUG] 🚨 Unauthorized confirm attempt!")
         await bot.answer_callback_query(callback_query.id, "🚫 You are not allowed to confirm this action!", show_alert=True)
         return
 
@@ -106,7 +106,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     ADMIN_ID.discard(entity_id)
     AUTHORIZED_ID.discard(entity_id)
 
-    print(f"[DEBUG] {entity_name} ({entity_id}) demoted successfully")
+    print(f"[DEBUG] ✅ {entity_name} ({entity_id}) demoted successfully!")
 
     await bot.edit_message_text(
         f"❌ User {entity_name} (`{entity_id}`) has been **demoted** successfully.",
@@ -120,12 +120,12 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
 @dp.callback_query_handler(demote_callback.filter(action="cancel"))
 async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
     """Handles cancellation of demotion."""
-    print("[DEBUG] Cancel demote triggered")
+    print("[DEBUG] ❌ Cancel button clicked!")
 
     admin_id = int(callback_data["admin_id"])
 
     if callback_query.from_user.id != admin_id:
-        print("[DEBUG] Unauthorized cancel attempt")
+        print("[DEBUG] 🚨 Unauthorized cancel attempt!")
         await bot.answer_callback_query(callback_query.id, "🚫 You are not allowed to cancel this action!", show_alert=True)
         return
 
