@@ -1,6 +1,7 @@
 from aiogram.utils.callback_data import CallbackData
 from aiogram import types
-from .misc import *
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from .misc import dp, bot, OWNER_ID, ADMIN_ID, AUTHORIZED_ID, admin_only
 
 demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
 
@@ -49,13 +50,12 @@ async def cmd_demote(message: types.Message) -> None:
 
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
-        entity_name = entity.mention_html() if entity.type == "private" else entity.title
+        entity_name = entity.get_mention(as_html=True) if entity.type == "private" else entity.title
     except Exception:
         entity_name = "Unknown"
 
     # Create confirmation buttons restricted to the admin who issued the command
-    confirm_markup = InlineKeyboardMarkup()
-    confirm_markup.add(
+    confirm_markup = InlineKeyboardMarkup(row_width=2).add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
         InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
     )
@@ -95,7 +95,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
 
     try:
         entity = await bot.get_chat(entity_id)
-        entity_name = entity.mention_html() if entity.type == "private" else entity.title
+        entity_name = entity.get_mention(as_html=True) if entity.type == "private" else entity.title
     except Exception:
         entity_name = "Unknown"
 
