@@ -142,3 +142,11 @@ async def catch_all_callbacks(callback_query: types.CallbackQuery):
     """Catches all callback queries for debugging."""
     logger.debug(f"[DEBUG] Raw callback received: {callback_query.data}")
     await bot.answer_callback_query(callback_query.id, "✅ Callback received!")
+
+async def on_startup(dispatcher: Dispatcher):
+    """Runs when the bot starts."""
+    logger.info("[DEBUG] Bot started successfully!")
+
+if __name__ == "__main__":
+    logger.info("[DEBUG] Starting bot...")
+    start_polling(dp, on_startup=on_startup)
