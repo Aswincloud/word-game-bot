@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+import subprocess
 from uuid import uuid4
 import os
 import signal
@@ -65,9 +66,12 @@ async def cmd_maintmode(message: types.Message) -> None:
 @dp.message_handler(is_owner=True, commands="restart")
 async def cmd_restart(message: types.Message) -> None:
     await message.reply(
-        "Restarting the bot...",
+        "Updating and restarting the bot...",
         allow_sending_without_reply=True
     )
+    
+    # Run git pull to fetch the latest changes
+    subprocess.run(["git", "pull"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     # Kill the current process
     os.kill(os.getpid(), signal.SIGTERM)
