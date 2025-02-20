@@ -1,8 +1,11 @@
 from aiogram import types
 from aiogram.dispatcher.filters import Command
-from aiogram.utils.exceptions import ChatNotFound
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.exceptions import ChatNotFound
 from .misc import *
+
+# Store admin IDs in a mutable list
+ADMIN_ID = set()  # Change this based on how you store admins
 
 @dp.message_handler(commands="demote")
 @admin_only
@@ -13,13 +16,15 @@ async def cmd_demote(message: types.Message) -> None:
 
     args = message.get_args()
     if not args:
-        await message.reply("Please provide a user ID.\nUsage: `/demote <user_id>`", parse_mode="Markdown", allow_sending_without_reply=True)
+        await message.reply("Please provide a user ID.\nUsage: `/demote <user_id>`", 
+                            parse_mode="Markdown", allow_sending_without_reply=True)
         return
 
     try:
         user_id = int(args.strip())
     except ValueError:
-        await message.reply("Invalid user ID format. Please provide a valid numeric ID.", allow_sending_without_reply=True)
+        await message.reply("Invalid user ID format. Please provide a valid numeric ID.", 
+                            allow_sending_without_reply=True)
         return
 
     if user_id not in ADMIN_ID:
@@ -33,10 +38,9 @@ async def cmd_demote(message: types.Message) -> None:
         user_name = "Unknown"
 
     # Create confirmation buttons
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(
-        InlineKeyboardButton("✅ Confirm", callback_data=f"confirm_demote_{user_id}"),
-        InlineKeyboardButton("❌ Cancel", callback_data=f"cancel_demote_{user_id}")
+    keyboard = InlineKeyboardMarkup().add(
+        InlineKeyboardButton("✅ Confirm", callback_data=f"confirm_demote:{user_id}"),
+        InlineKeyboardButton("❌ Cancel", callback_data=f"cancel_demote:{user_id}")
     )
 
     await message.reply(
@@ -46,9 +50,9 @@ async def cmd_demote(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.callback_query_handler(lambda c: c.data.startswith("confirm_demote_"))
+@dp.callback_query_handler(lambda c: c.data.startswith("confirm_demote:"))
 async def confirm_demote(callback_query: types.CallbackQuery):
-    user_id = int(callback_query.data.split("_")[-1])
+    user_id = int(callback_query.data.split(":")[-1])
 
     if user_id in ADMIN_ID:
         ADMIN_ID.remove(user_id)  # Remove user from the admin list
@@ -62,9 +66,9 @@ async def confirm_demote(callback_query: types.CallbackQuery):
             parse_mode="Markdown"
         )
 
-    await callback_query.answer()
+    await callback_query.answer()  # Acknowledge callback to avoid "button stuck" issues
 
-@dp.callback_query_handler(lambda c: c.data.startswith("cancel_demote_"))
+@dp.callback_query_handler(lambda c: c.data.startswith("cancel_demote:"))
 async def cancel_demote(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text("❌ Demotion cancelled.")
-    await callback_query.answer()
+    await callback_query.answer()  # Acknowledge callback
