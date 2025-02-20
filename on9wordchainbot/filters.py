@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 
-from .constants import OWNER_ID, VIP
+from .constants import OWNER_ID, VIP, ADMIN_ID
 
 
 class OwnerFilter(BoundFilter):
@@ -33,7 +33,7 @@ class AdminFilter(BoundFilter):
     async def check(self, message: types.Message) -> bool:
         from . import bot
 
-        if message.from_user.id == OWNER_ID:
+        if message.from_user.id == ADMIN_ID:
             return True
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         return chat_member.is_chat_admin()

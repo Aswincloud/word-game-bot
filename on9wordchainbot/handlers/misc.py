@@ -2,6 +2,7 @@ import asyncio
 import traceback
 import subprocess
 from uuid import uuid4
+from functools import wraps
 import os
 import signal
 
@@ -28,6 +29,18 @@ async def cmd_start(message: types.Message) -> None:
         reply_markup=ADD_TO_GROUP_KEYBOARD
     )
 
+def admin_only(f):
+    """Decorator to check if the user is an admin."""
+    @wraps(f)
+    async def wrapped(message: types.Message, *args, **kwargs):
+        if message.from_user.id not in ADMIN_ID:
+            await message.reply(
+                "⛔ You are not authorized to use this command!",
+                allow_sending_without_reply=True
+            )
+            return
+        return await f(message, *args, **kwargs)
+    return wrapped
 
 @dp.message_handler(commands="feedback")
 async def cmd_feedback(message: types.Message) -> None:
@@ -63,7 +76,8 @@ async def cmd_maintmode(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.message_handler(is_owner=True, commands="authorized_users")
+@dp.message_handler(commands="authorized_users")
+@admin_only
 async def cmd_authorized_users(message: types.Message) -> None:
     if not ADMIN_ID:
         await message.reply("No authorized users.", allow_sending_without_reply=True)
@@ -83,7 +97,8 @@ async def cmd_authorized_users(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.message_handler(is_owner=True, commands="authorized_groups")
+@dp.message_handler(commands="authorized_groups")
+@admin_only
 async def cmd_authorized_groups(message: types.Message) -> None:
     if not AUTHORIZED_ID:
         await message.reply("No authorized groups.", allow_sending_without_reply=True)
@@ -104,23 +119,18 @@ async def cmd_authorized_groups(message: types.Message) -> None:
     )
 
 @dp.message_handler(commands="restart")
+@admin_only
 async def cmd_restart(message: types.Message) -> None:
-    if message.from_user.id in ADMIN_ID:
-        await message.reply(
-            "Updating and restarting the bot...",
-            allow_sending_without_reply=True
-        )
-
-        # Run git pull to fetch the latest changes
-        subprocess.run(["git", "pull"], cwd=BOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        # Kill the current process
-        os.kill(os.getpid(), signal.SIGTERM)
-    else:
-        await message.reply(
-        "⛔ You are not authorized to use this command!",
+    await message.reply(
+        "Updating and restarting the bot...",
         allow_sending_without_reply=True
     )
+
+    # Run git pull to fetch the latest changes
+    subprocess.run(["git", "pull"], cwd=BOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Kill the current process
+    os.kill(os.getpid(), signal.SIGTERM)
 
 @dp.message_handler(
     ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
