@@ -63,6 +63,24 @@ async def cmd_maintmode(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
+@dp.message_handler(is_owner=True, commands="authorized_users")
+async def cmd_authorized_users(message: types.Message) -> None:
+    users_list = "\n".join(map(str, ADMIN_ID)) if ADMIN_ID else "No authorized users."
+    await message.reply(
+        f"👤 **Authorized Users:**\n{users_list}",
+        parse_mode=types.ParseMode.MARKDOWN,
+        allow_sending_without_reply=True
+    )
+
+@dp.message_handler(is_owner=True, commands="authorized_groups")
+async def cmd_authorized_groups(message: types.Message) -> None:
+    groups_list = "\n".join(map(str, AUTHORIZED_ID)) if AUTHORIZED_ID else "No authorized groups."
+    await message.reply(
+        f"📢 **Authorized Groups:**\n{groups_list}",
+        parse_mode=types.ParseMode.MARKDOWN,
+        allow_sending_without_reply=True
+    )
+    
 @dp.message_handler(commands="restart")
 async def cmd_restart(message: types.Message) -> None:
     if message.from_user.id in ADMIN_ID:
