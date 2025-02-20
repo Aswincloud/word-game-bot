@@ -1,5 +1,5 @@
 from aiogram.utils.callback_data import CallbackData
-
+from aiogram import types
 from .misc import *
 
 demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
@@ -49,11 +49,11 @@ async def cmd_demote(message: types.Message) -> None:
 
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
-        entity_name = entity.full_name if entity.type == "private" else entity.title
+        entity_name = entity.mention_html() if entity.type == "private" else entity.title
     except Exception:
         entity_name = "Unknown"
 
-    # Create confirmation buttons with admin_id restriction
+    # Create confirmation buttons restricted to the admin who issued the command
     confirm_markup = InlineKeyboardMarkup(row_width=2)
     confirm_markup.add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
@@ -61,8 +61,8 @@ async def cmd_demote(message: types.Message) -> None:
     )
 
     await message.reply(
-        f"⚠️ Are you sure you want to demote **{entity_name}** (`{entity_id}`)?",
-        parse_mode=types.ParseMode.MARKDOWN,
+        f"⚠️ Are you sure you want to demote {entity_name} (`{entity_id}`)?",
+        parse_mode=types.ParseMode.HTML,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
     )
@@ -94,16 +94,20 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
 
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
-        entity_name = entity.full_name if entity.type == "private" else entity.title
-    except Exception:
+        entity_name = entity.mention_html() if entity.type == "private" else entity.title
+    except Exception as e:
         entity_name = "Unknown"
+        await bot.answer_callback_query(
+            callback_query.id, f"⚠️ Error fetching details: {e}", show_alert=True
+        )
+        return
 
     # Remove from authorized lists
     if entity_id in ADMIN_ID:
-        ADMIN_ID.remove(entity_id)
+        ADMIN_ID.discard(entity_id)  # Use discard instead of remove
         entity_type = "User"
     elif entity_id in AUTHORIZED_ID:
-        AUTHORIZED_ID.remove(entity_id)
+        AUTHORIZED_ID.discard(entity_id)
         entity_type = "Group"
     else:
         await bot.answer_callback_query(
@@ -112,10 +116,10 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         return
 
     await bot.edit_message_text(
-        f"❌ {entity_type} `{entity_name}` (`{entity_id}`) has been **demoted** successfully.",
+        f"❌ {entity_type} {entity_name} (`{entity_id}`) has been **demoted** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
-        parse_mode=types.ParseMode.MARKDOWN
+        parse_mode=types.ParseMode.HTML
     )
 
 
