@@ -5,7 +5,7 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.utils.executor import start_polling
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters import Command
-
+from .misc import *
 # Enable detailed logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -16,10 +16,6 @@ bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())  # Logs all bot interactions
 
-# Replace with actual admin and owner IDs
-OWNER_ID = 123456789  # Change to actual owner ID
-ADMIN_ID = {987654321}  # Set of admin IDs
-AUTHORIZED_ID = {555555555}  # Set of authorized user IDs
 
 # Define callback data format
 demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
