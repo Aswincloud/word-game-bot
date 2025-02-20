@@ -71,9 +71,11 @@ async def cmd_demote(message: types.Message) -> None:
 # Callback handler for confirmation
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
 async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dict):
+    print("here")
     await bot.answer_callback_query(callback_query.id)  # Acknowledge button click
     entity_id = int(callback_data["entity_id"])
     admin_id = int(callback_data["admin_id"])
+    print(entity_id, admin_id)
 
     # Restrict button clicks to the admin who issued the command
     if callback_query.from_user.id != admin_id:
