@@ -63,7 +63,7 @@ async def cmd_maintmode(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.message_handler(is_owner=True, commands="restart")
+@dp.message_handler(commands="restart")
 async def cmd_restart(message: types.Message) -> None:
     if message.from_user.id in ADMIN_ID:
         await message.reply(
