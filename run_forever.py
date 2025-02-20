@@ -2,7 +2,7 @@ import subprocess
 import os
 
 run=True
-while run:
+while False:
     if os.path.exists("stop.txt"):
         print("Stop file detected. Exiting...")
         run=False
