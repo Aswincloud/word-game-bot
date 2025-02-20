@@ -67,6 +67,14 @@ async def cmd_demote(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
+@dp.callback_query_handler(demote_callback.filter())
+async def debug_callback(callback_query: types.CallbackQuery, callback_data: dict):
+    print(f"Received callback data: {callback_data}")
+    await callback_query.answer("Button clicked!")  # Notify the user
+
+@dp.callback_query_handler()
+async def catch_all_callbacks(callback_query: types.CallbackQuery):
+    print(f"Raw callback data: {callback_query.data}")
 
 # Callback handler for confirmation
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
