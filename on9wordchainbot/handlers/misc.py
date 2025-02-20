@@ -250,7 +250,7 @@ async def cmd_demote(message: types.Message) -> None:
     # Prevent demoting the bot owner
     if entity_id == OWNER_ID:
         await message.reply(
-            "😡 **Don't dare to demote my owner!** 🚀",
+            "😡 **Don't dare to demote my owner!** 🚀\n Better demote yourself!",
             parse_mode=types.ParseMode.MARKDOWN,
             allow_sending_without_reply=True
         )
