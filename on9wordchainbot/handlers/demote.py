@@ -54,7 +54,7 @@ async def cmd_demote(message: types.Message) -> None:
         entity_name = "Unknown"
 
     # Create confirmation buttons restricted to the admin who issued the command
-    confirm_markup = InlineKeyboardMarkup(row_width=2)
+    confirm_markup = InlineKeyboardMarkup()
     confirm_markup.add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
         InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
@@ -71,6 +71,7 @@ async def cmd_demote(message: types.Message) -> None:
 # Callback handler for confirmation
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
 async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dict):
+    await bot.answer_callback_query(callback_query.id)  # Acknowledge button click
     entity_id = int(callback_data["entity_id"])
     admin_id = int(callback_data["admin_id"])
 
@@ -93,30 +94,17 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         return
 
     try:
-        entity = await bot.get_chat(entity_id)  # Fetch user/group details
+        entity = await bot.get_chat(entity_id)
         entity_name = entity.mention_html() if entity.type == "private" else entity.title
-    except Exception as e:
+    except Exception:
         entity_name = "Unknown"
-        await bot.answer_callback_query(
-            callback_query.id, f"⚠️ Error fetching details: {e}", show_alert=True
-        )
-        return
 
     # Remove from authorized lists
-    if entity_id in ADMIN_ID:
-        ADMIN_ID.discard(entity_id)  # Use discard instead of remove
-        entity_type = "User"
-    elif entity_id in AUTHORIZED_ID:
-        AUTHORIZED_ID.discard(entity_id)
-        entity_type = "Group"
-    else:
-        await bot.answer_callback_query(
-            callback_query.id, "This ID is not authorized.", show_alert=True
-        )
-        return
+    ADMIN_ID.discard(entity_id)  
+    AUTHORIZED_ID.discard(entity_id)
 
     await bot.edit_message_text(
-        f"❌ {entity_type} {entity_name} (`{entity_id}`) has been **demoted** successfully.",
+        f"❌ User {entity_name} (`{entity_id}`) has been **demoted** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.HTML
@@ -126,6 +114,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
 # Callback handler for canceling demotion
 @dp.callback_query_handler(demote_callback.filter(action="cancel"))
 async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
+    await bot.answer_callback_query(callback_query.id)  # Acknowledge button click
     admin_id = int(callback_data["admin_id"])
 
     # Restrict button clicks to the admin who issued the command
