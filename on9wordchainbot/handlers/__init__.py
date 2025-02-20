@@ -1,4 +1,4 @@
-from . import donation, gameplay, info, misc, stats, wordlist
+from . import donation, gameplay, info, misc, stats, wordlist, authorize, demote
 
 __all__ = (
     "donation",
