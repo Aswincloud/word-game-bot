@@ -5,6 +5,8 @@ __all__ = (
     "gameplay",
     "info",
     "misc",
+    "authorize",
+    "demote",
     "stats",
     "wordlist"
 )
