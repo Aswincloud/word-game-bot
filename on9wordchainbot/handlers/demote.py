@@ -2,15 +2,12 @@ from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.exceptions import ChatNotFound
 from .misc import *
-# Assuming ADMIN_ID is stored as a set
+# Assuming ADMIN_ID is stored globally
 
 @dp.message_handler(commands="demote")
 async def cmd_demote(message: types.Message):
-    if not ADMIN_ID:
-        await message.reply("No authorized users to remove.", allow_sending_without_reply=True)
-        return
-
     args = message.get_args()
+    
     if not args:
         await message.reply("Please provide a user ID.\nUsage: `/demote <user_id>`", 
                             parse_mode="Markdown", allow_sending_without_reply=True)
@@ -34,7 +31,7 @@ async def cmd_demote(message: types.Message):
         user_name = "Unknown"
 
     # Create confirmation buttons
-    keyboard = InlineKeyboardMarkup().add(
+    keyboard = InlineKeyboardMarkup(row_width=2).add(
         InlineKeyboardButton("✅ Confirm", callback_data=f"confirm_demote:{user_id}"),
         InlineKeyboardButton("❌ Cancel", callback_data=f"cancel_demote:{user_id}")
     )
@@ -62,9 +59,9 @@ async def confirm_demote(callback_query: types.CallbackQuery):
             parse_mode="Markdown"
         )
 
-    await callback_query.answer()  # Acknowledge callback
+    await callback_query.answer()  # Acknowledge the button click
 
 @dp.callback_query_handler(lambda c: c.data.startswith("cancel_demote:"))
 async def cancel_demote(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text("❌ Demotion cancelled.")
-    await callback_query.answer()  # Acknowledge callback
+    await callback_query.answer()  # Acknowledge the button click
