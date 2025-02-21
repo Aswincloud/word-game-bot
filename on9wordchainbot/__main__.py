@@ -9,7 +9,7 @@ from periodic import Periodic
 from on9wordchainbot import dp, loop, pool, session
 from on9wordchainbot.utils import send_admin_group
 from on9wordchainbot.words import Words
-from constants import load_authorized_ids
+from on9wordchainbot.constants import load_authorized_ids
 
 random.seed(time.time())
 getcontext().rounding = ROUND_HALF_UP
@@ -20,7 +20,7 @@ async def on_startup(_) -> None:
     await load_authorized_ids()
 
     await Words.update()
-    
+
     # Notify admin group
     await send_admin_group("🚀 Bot is up and running!")
 
