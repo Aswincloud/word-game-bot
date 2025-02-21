@@ -172,14 +172,6 @@ async def cmd_demote(message: types.Message) -> None:
         )
         return
 
-    # Prevent demoting the bot owner
-    if entity_id == OWNER_ID:
-        await message.reply(
-            "😡 **Don't dare to demote my owner!** 🚀\n Better demote yourself!",
-            parse_mode=types.ParseMode.MARKDOWN,
-            allow_sending_without_reply=True
-        )
-        return
 
     # Check if the ID is actually authorized
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
@@ -228,7 +220,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     if entity_id == OWNER_ID:
         await bot.answer_callback_query(
             callback_query.id,
-            "🚫 You cannot demote the owner!",
+            "😡 **Don't dare to demote my owner!** 🚀\n Better demote yourself!",
             show_alert=True
         )
         return
