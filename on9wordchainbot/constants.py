@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from . import pool
+from on9wordchainbot import pool
 
 logger = logging.getLogger(__name__)
 
