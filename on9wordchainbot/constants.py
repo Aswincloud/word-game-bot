@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from .. import pool
+from . import pool
 
 logger = logging.getLogger(__name__)
 
