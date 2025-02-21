@@ -369,6 +369,11 @@ async def confirm_authorize(callback_query: types.CallbackQuery, callback_data: 
     else:  # Group
         AUTHORIZED_ID.append(entity_id)
         entity_type = "Group"
+    async with pool.acquire() as conn:
+        if entity_id > 0:  # User
+            await conn.execute("INSERT INTO admin_id (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING;", entity_id)
+        else:  # Group
+            await conn.execute("INSERT INTO authorized_id (group_id) VALUES ($1) ON CONFLICT (group_id) DO NOTHING;", entity_id)
 
     await bot.edit_message_text(
         f"✅ {entity_type} [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **authorized** successfully.",
