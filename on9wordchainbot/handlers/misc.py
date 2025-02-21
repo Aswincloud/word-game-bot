@@ -187,6 +187,7 @@ async def cmd_demote(message: types.Message) -> None:
     except Exception:
         entity_name = "Unknown"
     print("entity_name ", entity_name)
+    print("admin_id ", admin_id)
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
     print("debig 1")
@@ -199,7 +200,7 @@ async def cmd_demote(message: types.Message) -> None:
         f"⚠️ Are you sure you want to demote [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
-        # allow_sending_without_reply=True
+        allow_sending_without_reply=True
     )
 
 
