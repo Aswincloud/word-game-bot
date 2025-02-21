@@ -186,7 +186,7 @@ async def cmd_demote(message: types.Message) -> None:
         entity_name = entity.full_name if entity.type == "private" else entity.title
     except Exception:
         entity_name = "Unknown"
-
+    print("entity_name ", entity_name)
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
     confirm_markup.add(
