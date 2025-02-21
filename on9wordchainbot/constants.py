@@ -28,20 +28,24 @@ BOT_DIR = "/home/aswin/on9wordchainbot"
 STAR = "\u2b50\ufe0f"
 
 async def load_authorized_ids():
-    """Fetch admin and authorized IDs from the database and store them in lists."""
-    global ADMIN_ID, AUTHORIZED_ID
+    """Fetch admin and authorized IDs from the database and append them to existing lists."""
+    global ADMIN_ID, AUTHORIZED_ID  # Explicitly modify global lists
     from on9wordchainbot import pool
     try:
         async with pool.acquire() as conn:
             # Fetch admin IDs
             admin_records = await conn.fetch("SELECT user_id FROM admin_id;")
-            ADMIN_ID = [record["user_id"] for record in admin_records]
+            new_admin_ids = {record["user_id"] for record in admin_records}
 
             # Fetch authorized group IDs
             authorized_records = await conn.fetch("SELECT group_id FROM authorized_id;")
-            AUTHORIZED_ID = [record["group_id"] for record in authorized_records]
+            new_authorized_ids = {record["group_id"] for record in authorized_records}
 
-            print("✅ Admin & Authorized IDs loaded successfully!")
+            # Append only new IDs (avoid duplicates)
+            ADMIN_ID.extend(id for id in new_admin_ids if id not in ADMIN_ID)
+            AUTHORIZED_ID.extend(id for id in new_authorized_ids if id not in AUTHORIZED_ID)
+
+        print("✅ Admin & Authorized IDs updated successfully!")
     except Exception as e:
         print(f"⚠️ Database Error: {e}")
 
