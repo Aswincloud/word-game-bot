@@ -243,6 +243,11 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
             callback_query.id, "This ID is not authorized.", show_alert=True
         )
         return
+    async with pool.acquire() as conn:
+        if entity_id > 0:  # User
+            await conn.execute("DELETE FROM admin_id WHERE user_id = $1;", entity_id)
+        else:  # Group
+            await conn.execute("DELETE FROM authorized_id WHERE group_id = $1;", entity_id)
 
     await bot.edit_message_text(
         f"❌ {entity_type} [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **demoted** successfully.",
