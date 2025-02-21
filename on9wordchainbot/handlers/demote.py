@@ -1,14 +1,11 @@
 from aiogram import types
-from aiogram.dispatcher.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.exceptions import ChatNotFound
 from .misc import *
-
-# Store admin IDs in a mutable list
+# Assuming ADMIN_ID is stored as a set
 
 @dp.message_handler(commands="demote")
-@admin_only
-async def cmd_demote(message: types.Message) -> None:
+async def cmd_demote(message: types.Message):
     if not ADMIN_ID:
         await message.reply("No authorized users to remove.", allow_sending_without_reply=True)
         return
@@ -65,7 +62,7 @@ async def confirm_demote(callback_query: types.CallbackQuery):
             parse_mode="Markdown"
         )
 
-    await callback_query.answer()  # Acknowledge callback to avoid "button stuck" issues
+    await callback_query.answer()  # Acknowledge callback
 
 @dp.callback_query_handler(lambda c: c.data.startswith("cancel_demote:"))
 async def cancel_demote(callback_query: types.CallbackQuery):
