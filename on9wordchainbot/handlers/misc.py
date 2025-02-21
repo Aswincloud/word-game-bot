@@ -198,7 +198,7 @@ async def cmd_demote(message: types.Message) -> None:
         f"⚠️ Are you sure you want to demote [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
-        allow_sending_without_reply=True
+        # allow_sending_without_reply=True
     )
 
 
