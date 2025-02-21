@@ -162,6 +162,7 @@ async def cmd_demote(message: types.Message) -> None:
             entity_id = message.reply_to_message.from_user.id
         elif message.reply_to_message.sender_chat:  # For channels/supergroups
             entity_id = message.reply_to_message.sender_chat.id
+    print("entity_id ", entity_id)
 
     if not entity_id:
         await message.reply(
