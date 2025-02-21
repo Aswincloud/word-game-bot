@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-from on9wordchainbot import pool
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +30,7 @@ STAR = "\u2b50\ufe0f"
 async def load_authorized_ids():
     """Fetch admin and authorized IDs from the database and store them in lists."""
     global ADMIN_ID, AUTHORIZED_ID
+    from on9wordchainbot import pool
     try:
         async with pool.acquire() as conn:
             # Fetch admin IDs
