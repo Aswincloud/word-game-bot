@@ -162,7 +162,6 @@ async def cmd_demote(message: types.Message) -> None:
             entity_id = message.reply_to_message.from_user.id
         elif message.reply_to_message.sender_chat:  # For channels/supergroups
             entity_id = message.reply_to_message.sender_chat.id
-    print("entity_id ", entity_id)
 
     if not entity_id:
         await message.reply(
@@ -172,7 +171,6 @@ async def cmd_demote(message: types.Message) -> None:
             allow_sending_without_reply=True
         )
         return
-
 
     # Check if the ID is actually authorized
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
@@ -184,25 +182,27 @@ async def cmd_demote(message: types.Message) -> None:
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
         entity_name = entity.full_name if entity.type == "private" else entity.title
-    except Exception:
-        entity_name = "Unknown"
-    print("entity_name ", entity_name)
-    print("admin_id ", admin_id)
+    except Exception as e:
+        print(f"Error fetching chat details: {e}")
+        await message.reply(
+            "❌ Failed to fetch user/group details. Please check the ID and try again.",
+            allow_sending_without_reply=True
+        )
+        return
+
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
-    print("debig 1")
     confirm_markup.add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
         InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
     )
-    print("debig 2")
+
     await message.reply(
         f"⚠️ Are you sure you want to demote [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
     )
-
 
 # Callback handler for confirmation
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
@@ -231,8 +231,12 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
         entity_name = entity.full_name if entity.type == "private" else entity.title
-    except Exception:
-        entity_name = "Unknown"
+    except Exception as e:
+        print(f"Error fetching chat details: {e}")
+        await bot.answer_callback_query(
+            callback_query.id, "Failed to fetch user/group details.", show_alert=True
+        )
+        return
 
     # Remove from authorized lists
     if entity_id in ADMIN_ID:
@@ -254,7 +258,6 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         parse_mode=types.ParseMode.MARKDOWN
     )
 
-
 # Callback handler for canceling demotion
 @dp.callback_query_handler(demote_callback.filter(action="cancel"))
 async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
@@ -275,8 +278,6 @@ async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
     )
-
-
 authorize_callback = CallbackData("authorize", "action", "entity_id", "admin_id")
 
 @dp.message_handler(commands="authorize")
