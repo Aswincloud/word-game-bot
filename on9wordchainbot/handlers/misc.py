@@ -202,7 +202,7 @@ async def cmd_demote(message: types.Message) -> None:
     )
 
     await message.reply(
-        f"⚠️ Are you sure you want to demote **{entity_name}** (`{entity_id}`)?",
+        f"⚠️ Are you sure you want to demote [🌀 {entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
@@ -253,7 +253,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         return
 
     await bot.edit_message_text(
-        f"❌ {entity_type} `{entity_name}` (`{entity_id}`) has been **demoted** successfully.",
+        f"❌ {entity_type} [🌀 {entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **demoted** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
@@ -342,7 +342,7 @@ async def cmd_authorize(message: types.Message) -> None:
     )
 
     await message.reply(
-        f"⚠️ Are you sure you want to authorize [🌀 {entity_name}](tg://user?id={entity_id})?",
+        f"⚠️ Are you sure you want to authorize [{entity_name}](tg://user?id={entity_id})?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
@@ -379,7 +379,7 @@ async def confirm_authorize(callback_query: types.CallbackQuery, callback_data: 
         entity_type = "Group"
 
     await bot.edit_message_text(
-        f"✅ {entity_type} `{entity_name}` (`{entity_id}`) has been **authorized** successfully.",
+        f"✅ {entity_type} [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **authorized** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
