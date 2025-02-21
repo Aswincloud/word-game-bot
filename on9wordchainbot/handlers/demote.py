@@ -1,14 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.callback_data import CallbackData
+
 from .misc import *
-
-demote_callback = CallbackData("demote", "action", "entity_id", "admin_id")
-
 @dp.message_handler(commands="demote")
 @admin_only
 async def cmd_demote(message: types.Message) -> None:
     entity_id = None
-    admin_id = message.from_user.id  # Admin who initiated the command
 
     # If command is used with an ID
     args = message.text.split()
@@ -22,6 +18,7 @@ async def cmd_demote(message: types.Message) -> None:
         elif message.reply_to_message.sender_chat:  # For channels/supergroups
             entity_id = message.reply_to_message.sender_chat.id
 
+    # If no valid ID was found, show usage message
     if not entity_id:
         await message.reply(
             "⚠️ Usage: `/demote <user_or_group_id>` or reply to a user's message with `/demote`.\n\n"
@@ -53,11 +50,11 @@ async def cmd_demote(message: types.Message) -> None:
     except Exception:
         entity_name = "Unknown"
 
-    # Create confirmation buttons with admin_id restriction
+    # Create confirmation buttons
     confirm_markup = InlineKeyboardMarkup(row_width=2)
     confirm_markup.add(
-        InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
-        InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
+        InlineKeyboardButton("✅ Confirm", callback_data=f"confirm_demote:{entity_id}"),
+        InlineKeyboardButton("❌ Cancel", callback_data="cancel_demote")
     )
 
     await message.reply(
@@ -69,19 +66,9 @@ async def cmd_demote(message: types.Message) -> None:
 
 
 # Callback handler for confirmation
-@dp.callback_query_handler(demote_callback.filter(action="confirm"))
-async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dict):
-    entity_id = int(callback_data["entity_id"])
-    admin_id = int(callback_data["admin_id"])
-
-    # Restrict button clicks to the admin who issued the command
-    if callback_query.from_user.id != admin_id:
-        await bot.answer_callback_query(
-            callback_query.id,
-            "🚫 You are not allowed to confirm this action!",
-            show_alert=True
-        )
-        return
+@dp.callback_query_handler(lambda call: call.data.startswith("confirm_demote"))
+async def confirm_demote(callback_query: types.CallbackQuery):
+    entity_id = int(callback_query.data.split(":")[1])
 
     # Ensure owner is not demoted (Extra Safety)
     if entity_id == OWNER_ID:
@@ -120,19 +107,8 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
 
 
 # Callback handler for canceling demotion
-@dp.callback_query_handler(demote_callback.filter(action="cancel"))
-async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
-    admin_id = int(callback_data["admin_id"])
-
-    # Restrict button clicks to the admin who issued the command
-    if callback_query.from_user.id != admin_id:
-        await bot.answer_callback_query(
-            callback_query.id,
-            "🚫 You are not allowed to cancel this action!",
-            show_alert=True
-        )
-        return
-
+@dp.callback_query_handler(lambda call: call.data == "cancel_demote")
+async def cancel_demote(callback_query: types.CallbackQuery):
     await bot.edit_message_text(
         "❌ Demotion cancelled.",
         chat_id=callback_query.message.chat.id,
