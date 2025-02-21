@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from .. import pool
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,22 @@ WORDLIST_SOURCE = "https://raw.githubusercontent.com/dwyl/english-words/master/w
 BOT_DIR = "/home/aswin/on9wordchainbot"
 STAR = "\u2b50\ufe0f"
 
+async def load_authorized_ids():
+    """Fetch admin and authorized IDs from the database and store them in lists."""
+    global ADMIN_ID, AUTHORIZED_ID
+    try:
+        async with pool.acquire() as conn:
+            # Fetch admin IDs
+            admin_records = await conn.fetch("SELECT user_id FROM admin_id;")
+            ADMIN_ID = [record["user_id"] for record in admin_records]
+
+            # Fetch authorized group IDs
+            authorized_records = await conn.fetch("SELECT group_id FROM authorized_id;")
+            AUTHORIZED_ID = [record["group_id"] for record in authorized_records]
+
+            print("✅ Admin & Authorized IDs loaded successfully!")
+    except Exception as e:
+        print(f"⚠️ Database Error: {e}")
 
 class GameState:
     JOINING = 0
