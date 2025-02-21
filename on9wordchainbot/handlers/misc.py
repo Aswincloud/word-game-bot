@@ -372,10 +372,10 @@ async def confirm_authorize(callback_query: types.CallbackQuery, callback_data: 
 
     # Add to the appropriate authorization list
     if entity_id > 0:  # User
-        ADMIN_ID.add(entity_id)
+        ADMIN_ID.append(entity_id)
         entity_type = "User"
     else:  # Group
-        AUTHORIZED_ID.add(entity_id)
+        AUTHORIZED_ID.append(entity_id)
         entity_type = "Group"
 
     await bot.edit_message_text(
