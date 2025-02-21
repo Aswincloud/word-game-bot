@@ -189,11 +189,12 @@ async def cmd_demote(message: types.Message) -> None:
     print("entity_name ", entity_name)
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
+    print("debig 1")
     confirm_markup.add(
         InlineKeyboardButton("✅ Confirm", callback_data=demote_callback.new("confirm", entity_id, admin_id)),
         InlineKeyboardButton("❌ Cancel", callback_data=demote_callback.new("cancel", entity_id, admin_id))
     )
-
+    print("debig 2")
     await message.reply(
         f"⚠️ Are you sure you want to demote [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
