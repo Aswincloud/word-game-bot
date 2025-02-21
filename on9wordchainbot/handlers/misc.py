@@ -175,7 +175,7 @@ async def cmd_demote(message: types.Message) -> None:
     # Prevent demoting the bot owner
     if entity_id == OWNER_ID:
         await message.reply(
-            "😡 **Don't dare to demote my owner!** 🚀",
+            "😡 **Don't dare to demote my owner!** 🚀\n Better demote yourself!",
             parse_mode=types.ParseMode.MARKDOWN,
             allow_sending_without_reply=True
         )
@@ -202,7 +202,7 @@ async def cmd_demote(message: types.Message) -> None:
     )
 
     await message.reply(
-        f"⚠️ Are you sure you want to demote [🌀 {entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
+        f"⚠️ Are you sure you want to demote [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`)?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
@@ -253,7 +253,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         return
 
     await bot.edit_message_text(
-        f"❌ {entity_type} [🌀 {entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **demoted** successfully.",
+        f"❌ {entity_type} [{entity_name}](tg://user?id={entity_id}) (`{entity_id}`) has been **demoted** successfully.",
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
