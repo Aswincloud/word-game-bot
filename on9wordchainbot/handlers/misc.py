@@ -172,6 +172,7 @@ async def cmd_demote(message: types.Message) -> None:
         )
         return
 
+
     # Check if the ID is actually authorized
     if entity_id not in ADMIN_ID and entity_id not in AUTHORIZED_ID:
         await message.reply(
@@ -182,13 +183,8 @@ async def cmd_demote(message: types.Message) -> None:
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
         entity_name = entity.full_name if entity.type == "private" else entity.title
-    except Exception as e:
-        print(f"Error fetching chat details: {e}")
-        await message.reply(
-            "❌ Failed to fetch user/group details. Please check the ID and try again.",
-            allow_sending_without_reply=True
-        )
-        return
+    except Exception:
+        entity_name = "Unknown"
 
     # Create confirmation buttons with admin_id restriction
     confirm_markup = InlineKeyboardMarkup(row_width=2)
@@ -203,6 +199,7 @@ async def cmd_demote(message: types.Message) -> None:
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
     )
+
 
 # Callback handler for confirmation
 @dp.callback_query_handler(demote_callback.filter(action="confirm"))
@@ -231,12 +228,8 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
     try:
         entity = await bot.get_chat(entity_id)  # Fetch user/group details
         entity_name = entity.full_name if entity.type == "private" else entity.title
-    except Exception as e:
-        print(f"Error fetching chat details: {e}")
-        await bot.answer_callback_query(
-            callback_query.id, "Failed to fetch user/group details.", show_alert=True
-        )
-        return
+    except Exception:
+        entity_name = "Unknown"
 
     # Remove from authorized lists
     if entity_id in ADMIN_ID:
@@ -258,6 +251,7 @@ async def confirm_demote(callback_query: types.CallbackQuery, callback_data: dic
         parse_mode=types.ParseMode.MARKDOWN
     )
 
+
 # Callback handler for canceling demotion
 @dp.callback_query_handler(demote_callback.filter(action="cancel"))
 async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict):
@@ -278,6 +272,8 @@ async def cancel_demote(callback_query: types.CallbackQuery, callback_data: dict
         message_id=callback_query.message.message_id,
         parse_mode=types.ParseMode.MARKDOWN
     )
+
+
 authorize_callback = CallbackData("authorize", "action", "entity_id", "admin_id")
 
 @dp.message_handler(commands="authorize")
