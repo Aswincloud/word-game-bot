@@ -342,7 +342,7 @@ async def cmd_authorize(message: types.Message) -> None:
     )
 
     await message.reply(
-        f"⚠️ Are you sure you want to authorize **{entity_name}** (`{entity_id}`)?",
+        f"⚠️ Are you sure you want to authorize [🌀 {entity_name}](tg://user?id={entity_id})?",
         parse_mode=types.ParseMode.MARKDOWN,
         reply_markup=confirm_markup,
         allow_sending_without_reply=True
