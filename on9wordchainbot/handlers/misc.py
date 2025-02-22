@@ -291,6 +291,7 @@ async def cmd_authorize(message: types.Message) -> None:
     args = message.text.split()
     if len(args) == 2 and args[1].isdigit():
         entity_id = int(args[1])
+        print("entity_id ",entity_id)
 
     # If the command is used as a reply, get the replied user's ID
     elif message.reply_to_message:
