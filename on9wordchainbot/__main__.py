@@ -2,8 +2,6 @@ import asyncio
 import random
 import time
 from decimal import ROUND_HALF_UP, getcontext
-from flask import Flask
-from threading import Thread
 
 from aiogram import executor
 from periodic import Periodic
@@ -16,14 +14,6 @@ from on9wordchainbot.constants import load_authorized_ids
 random.seed(time.time())
 getcontext().rounding = ROUND_HALF_UP
 
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Bot is running!", 200
-
-def run_flask():
-    app.run(host="0.0.0.0", port=8000)
 
 async def on_startup(_) -> None:
 
@@ -50,5 +40,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    Thread(target=run_flask, daemon=True).start()
     main()

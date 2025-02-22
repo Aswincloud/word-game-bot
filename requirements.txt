@@ -1,7 +1,6 @@
 aiocache
 aiofiles
 aiogram
-flask
 aiohttp[speedups]
 asyncio-periodic
 asyncpg
