@@ -78,7 +78,7 @@ async def cmd_maintmode(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.message_handler(commands="authorized_users")
+@dp.message_handler(commands="authorized_users", "au")
 @admin_only
 async def cmd_authorized_users(message: types.Message) -> None:
     if not ADMIN_ID:
@@ -99,7 +99,7 @@ async def cmd_authorized_users(message: types.Message) -> None:
         allow_sending_without_reply=True
     )
 
-@dp.message_handler(commands="authorized_groups")
+@dp.message_handler(commands="authorized_groups", "ag")
 @admin_only
 async def cmd_authorized_groups(message: types.Message) -> None:
     if not AUTHORIZED_ID:
