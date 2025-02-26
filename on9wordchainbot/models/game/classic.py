@@ -21,7 +21,7 @@ class ClassicGame:
         "group_id", "players", "players_in_game", "state", "start_time", "end_time",
         "extended_user_ids", "min_players", "max_players", "time_left", "time_limit",
         "min_letters_limit", "current_word", "longest_word", "longest_word_sender_id",
-        "answered", "accepting_answers", "turns", "used_words", "join_lock"
+        "answered", "accepting_answers", "turns", "used_words", "join_lock", "timer_message"
     )
 
     def __init__(self, group_id: int) -> None:
@@ -51,6 +51,7 @@ class ClassicGame:
         self.used_words: Set[str] = set()
 
         self.join_lock = asyncio.Lock()  # Prevent same user / vp joining as multiple players
+        self.timer_message = None
 
     def user_in_game(self, user_id: int) -> bool:
         return any(p.user_id == user_id for p in self.players)
