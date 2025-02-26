@@ -471,14 +471,14 @@ class ClassicGame:
                     parse_mode=types.ParseMode.HTML
                 )
             elif self.time_left == 10:
-                timer_message = await self.send_message(
+                self.timer_message = await self.send_message(
                     f"⏳ {self.time_left} seconds left!",
                     parse_mode=types.ParseMode.HTML
                 )
-            elif self.time_left < 10:
+            elif self.time_left < 10 and hasattr(self, "timer_message"):
                 HOURGLASS_FRAMES = ["⏳", "⌛"]
                 emoji = HOURGLASS_FRAMES[self.time_left % 2]
-                await timer_message.edit_text(
+                await self.timer_message.edit_text(
                     text=f"{emoji} {self.time_left} seconds left!",
                     parse_mode=types.ParseMode.HTML
                 )
