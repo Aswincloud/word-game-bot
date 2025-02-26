@@ -478,9 +478,7 @@ class ClassicGame:
             elif self.time_left < 10:
                 HOURGLASS_FRAMES = ["⏳", "⌛"]
                 emoji = HOURGLASS_FRAMES[self.time_left % 2]
-                await self.edit_message_text(
-                    chat_id=self.chat_id,
-                    message_id=timer_message.message_id,
+                await timer_message.edit_text(
                     text=f"{emoji} {self.time_left} seconds left!",
                     parse_mode=types.ParseMode.HTML
                 )
