@@ -10,7 +10,7 @@ from .. import GlobalState, dp, on9bot
 from ..constants import GameSettings, GameState, VIP, VIP_GROUP
 from ..models import ClassicGame, EliminationGame, GAME_MODES, MixedEliminationGame
 from ..utils import amt_donated, send_groups_only_message
-
+from .misc import admin_only
 
 @send_groups_only_message
 async def start_game(message: types.Message, game_type: Type[ClassicGame]) -> None:
@@ -85,7 +85,8 @@ async def cmd_join(message: types.Message) -> None:
         await GlobalState.games[group_id].join(message)
 
 
-@dp.message_handler(is_owner=True, game_running=True, commands="forcejoin")
+@dp.message_handler(game_running=True, commands="forcejoin")
+@admin_only
 async def cmd_forcejoin(message: types.Message) -> None:
     group_id = message.chat.id
     rmsg = message.reply_to_message
@@ -113,12 +114,14 @@ async def cmd_flee(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].flee(message)
 
 
-@dp.message_handler(is_owner=True, game_running=True, commands="forceflee")
+@dp.message_handler(game_running=True, commands="forceflee")
+@admin_only
 async def cmd_forceflee(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].forceflee(message)
 
 
-@dp.message_handler(is_owner=True, commands=["killgame", "killgaym"])
+@dp.message_handler(commands=["killgame", "killgaym"])
+@admin_only
 async def cmd_killgame(message: types.Message) -> None:
     try:
         group_id = int(message.get_args() or message.chat.id)
@@ -137,7 +140,8 @@ async def cmd_killgame(message: types.Message) -> None:
         await message.reply("Game ended forcibly.", allow_sending_without_reply=True)
 
 
-@dp.message_handler(is_owner=True, game_running=True, commands="forceskip")
+@dp.message_handler(game_running=True, commands="forceskip")
+@admin_only
 async def cmd_forceskip(message: types.Message) -> None:
     group_id = message.chat.id
     if GlobalState.games[group_id].state == GameState.RUNNING and not GlobalState.games[group_id].answered:
@@ -164,7 +168,8 @@ async def cmd_remvp(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].remvp(message)
 
 
-@dp.message_handler(is_owner=True, game_running=True, commands="incmaxp")
+@dp.message_handler(game_running=True, commands="incmaxp")
+@admin_only
 async def cmd_incmaxp(message: types.Message) -> None:
     # Thought this could be useful when I implemented this
     # It is not

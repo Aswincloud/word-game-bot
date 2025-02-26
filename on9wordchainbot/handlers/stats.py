@@ -13,7 +13,7 @@ from aiogram.utils.markdown import quote_html
 from asyncpg import Record
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
-
+from .misc import admin_only
 from .. import dp, pool
 from ..utils import has_star, send_groups_only_message
 
@@ -108,7 +108,8 @@ async def cmd_globalstats(message: types.Message) -> None:
     await message.reply(await get_global_stats(), allow_sending_without_reply=True)
 
 
-@dp.message_handler(is_owner=True, commands=["trend", "trends"])
+@dp.message_handler(commands=["trend", "trends"])
+@admin_only
 async def cmd_trends(message: types.Message) -> None:
     try:
         days = int(message.get_args() or 14)

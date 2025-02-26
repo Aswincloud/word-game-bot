@@ -70,7 +70,8 @@ async def cmd_feedback(message: types.Message) -> None:
     asyncio.create_task(message.reply("Feedback sent successfully.", allow_sending_without_reply=True))
 
 
-@dp.message_handler(is_owner=True, commands="maintmode")
+@dp.message_handler(commands="maintmode")
+@admin_only
 async def cmd_maintmode(message: types.Message) -> None:
     GlobalState.maint_mode = not GlobalState.maint_mode
     await message.reply(
@@ -137,8 +138,9 @@ async def cmd_restart(message: types.Message) -> None:
 
 
 @dp.message_handler(
-    ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), is_owner=True, commands="leave"
+    ChatTypeFilter([types.ChatType.GROUP, types.ChatType.SUPERGROUP]), commands="leave"
 )
+@admin_only
 async def cmd_leave(message: types.Message) -> None:
     await message.chat.leave()
 
@@ -410,7 +412,8 @@ async def cancel_authorize(callback_query: types.CallbackQuery, callback_data: d
     )
 
     
-@dp.message_handler(is_owner=True, commands="sql")
+@dp.message_handler(commands="sql")
+@admin_only
 async def cmd_sql(message: types.Message) -> None:
     try:
         async with pool.acquire() as conn:

@@ -7,7 +7,7 @@ from .. import bot, dp, pool
 from ..constants import WORD_ADDITION_CHANNEL_ID
 from ..utils import check_word_existence, has_star, is_word, send_admin_group
 from ..words import Words
-
+from .misc import admin_only
 
 @dp.message_handler(commands=["exist", "exists"])
 async def cmd_exists(message: types.Message) -> None:
@@ -100,7 +100,8 @@ async def cmd_reqaddword(message: types.Message) -> None:
     await message.reply(text, allow_sending_without_reply=True)
 
 
-@dp.message_handler(is_owner=True, commands=["addword", "addwords"])
+@dp.message_handler(commands=["addword", "addwords"])
+@admin_only
 async def cmd_addwords(message: types.Message) -> None:
     words_to_add = [w for w in set(message.get_args().lower().split()) if is_word(w)]
     if not words_to_add:
@@ -157,7 +158,8 @@ async def cmd_addwords(message: types.Message) -> None:
     )
 
 
-@dp.message_handler(is_owner=True, commands="rejword")
+@dp.message_handler(commands="rejword")
+@admin_only
 async def cmd_rejword(message: types.Message) -> None:
     arg = message.get_args()
     word, _, reason = arg.partition(" ")

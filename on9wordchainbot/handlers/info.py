@@ -11,6 +11,7 @@ from .. import GlobalState, bot, dp
 from ..constants import GameState
 from ..utils import inline_keyboard_from_button, send_private_only_message
 from ..words import Words
+from .misc import admin_only
 
 
 @dp.message_handler(CommandStart("help"), ChatTypeFilter([types.ChatType.PRIVATE]))
@@ -109,7 +110,8 @@ async def cmd_runinfo(message: types.Message) -> None:
     )
 
 
-@dp.message_handler(is_owner=True, commands="playinggroups")
+@dp.message_handler(commands="playinggroups")
+@admin_only
 async def cmd_playinggroups(message: types.Message) -> None:
     if not GlobalState.games:
         await message.reply("No groups are playing games.", allow_sending_without_reply=True)
