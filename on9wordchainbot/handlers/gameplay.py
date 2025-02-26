@@ -102,7 +102,8 @@ async def cmd_extend(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].extend(message)
 
 
-@dp.message_handler(is_admin=True, game_running=True, commands="forcestart")
+@dp.message_handler(game_running=True, commands="forcestart")
+@admin_only
 async def cmd_forcestart(message: types.Message) -> None:
     group_id = message.chat.id
     if GlobalState.games[group_id].state == GameState.JOINING:
