@@ -10,8 +10,10 @@ from on9wordchainbot.filters import IsOwner
 from on9wordchainbot.resources import bot, get_pool
 from on9wordchainbot.utils import awaitable_to_coroutine, check_word_existence, has_star, is_word, send_admin_group
 from on9wordchainbot.words import Words
+from on9wordchainbot.handlers.misc import admin_only
 
 router = Router(name=__name__)
+
 
 
 @router.message(Command("exist", "exists"))
@@ -104,7 +106,8 @@ async def cmd_reqaddword(message: types.Message, command: CommandObject) -> None
     await message.reply(text)
 
 
-@router.message(IsOwner(), Command("addword", "addwords"))
+@router.message(Command("addword", "addwords"))
+@admin_only
 async def cmd_addwords(message: types.Message, command: CommandObject) -> None:
     args = command.args
     if args and (words_to_add := [w for w in set(args.lower().split()) if is_word(w)]):
@@ -164,7 +167,8 @@ async def cmd_addwords(message: types.Message, command: CommandObject) -> None:
     )
 
 
-@router.message(IsOwner(), Command("rejword"))
+@router.message(Command("rejword"))
+@admin_only
 async def cmd_rejword(message: types.Message, command: CommandObject) -> None:
     args = command.args
     if not args:

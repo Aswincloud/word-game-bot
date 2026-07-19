@@ -10,8 +10,10 @@ from on9wordchainbot.filters import HasGameInstance, IsAdmin, IsOwner
 from on9wordchainbot.models import ClassicGame, EliminationGame, GAME_MODES, MixedEliminationGame
 from on9wordchainbot.resources import GlobalState, on9bot
 from on9wordchainbot.utils import amt_donated, send_groups_only_message
+from on9wordchainbot.handlers.misc import admin_only
 
 router = Router(name=__name__)
+
 
 
 @send_groups_only_message
@@ -78,7 +80,8 @@ async def cmd_join(message: types.Message) -> None:
         await GlobalState.games[group_id].join(message)
 
 
-@router.message(Command("forcejoin"), IsOwner(), HasGameInstance())
+@router.message(Command("forcejoin"), HasGameInstance())
+@admin_only
 async def cmd_forcejoin(message: types.Message) -> None:
     group_id = message.chat.id
     rmsg = message.reply_to_message
@@ -94,7 +97,8 @@ async def cmd_extend(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].extend(message)
 
 
-@router.message(Command("forcestart"), IsAdmin(), HasGameInstance())
+@router.message(Command("forcestart"), HasGameInstance())
+@admin_only
 async def cmd_forcestart(message: types.Message) -> None:
     group_id = message.chat.id
     if GlobalState.games[group_id].state == GameState.JOINING:
@@ -106,12 +110,14 @@ async def cmd_flee(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].flee(message)
 
 
-@router.message(Command("forceflee"), IsOwner(), HasGameInstance())
+@router.message(Command("forceflee"), HasGameInstance())
+@admin_only
 async def cmd_forceflee(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].forceflee(message)
 
 
-@router.message(Command("killgame", "killgaym"), IsOwner())
+@router.message(Command("killgame", "killgaym"))
+@admin_only
 async def cmd_killgame(message: types.Message, command: CommandObject) -> None:
     try:
         group_id = int(command.args or message.chat.id)
@@ -130,7 +136,8 @@ async def cmd_killgame(message: types.Message, command: CommandObject) -> None:
         await message.reply("Game ended forcibly.")
 
 
-@router.message(Command("forceskip"), IsOwner(), HasGameInstance())
+@router.message(Command("forceskip"), HasGameInstance())
+@admin_only
 async def cmd_forceskip(message: types.Message) -> None:
     group_id = message.chat.id
     if GlobalState.games[group_id].state == GameState.RUNNING and not GlobalState.games[group_id].answered:
@@ -155,7 +162,8 @@ async def cmd_remvp(message: types.Message) -> None:
     await GlobalState.games[message.chat.id].remvp(message)
 
 
-@router.message(IsOwner(), HasGameInstance(), Command("incmaxp"))
+@router.message(HasGameInstance(), Command("incmaxp"))
+@admin_only
 async def cmd_incmaxp(message: types.Message) -> None:
     # Thought this could be useful when I implemented this
     # It is not

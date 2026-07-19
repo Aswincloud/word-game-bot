@@ -14,10 +14,9 @@ from aiogram.filters import Command, CommandObject
 from asyncpg import Record
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
-
 from on9wordchainbot.constants import STAR
 from on9wordchainbot.resources import get_pool
-from on9wordchainbot.filters import IsOwner
+from on9wordchainbot.filters import IsAdmin
 from on9wordchainbot.utils import has_star, send_groups_only_message
 
 router = Router(name=__name__)
@@ -119,7 +118,7 @@ async def cmd_globalstats(message: types.Message) -> None:
     await message.reply(await get_global_stats())
 
 
-@router.message(IsOwner(), Command("trend", "trends"))
+@router.message(IsAdmin(), Command("trend", "trends"))
 async def cmd_trends(message: types.Message, command: CommandObject) -> None:
     args = command.args
     try:

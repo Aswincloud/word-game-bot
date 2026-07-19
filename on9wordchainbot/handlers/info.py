@@ -10,8 +10,9 @@ from aiogram.utils.deep_linking import create_start_link
 from on9wordchainbot.resources import GlobalState
 from on9wordchainbot.constants import GameState
 from on9wordchainbot.utils import inline_keyboard_from_button, send_private_only_message
-from on9wordchainbot.filters import IsOwner
+from on9wordchainbot.filters import IsAdmin
 from on9wordchainbot.words import Words
+from on9wordchainbot.handlers.misc import admin_only
 
 router = Router(name=__name__)
 
@@ -34,12 +35,8 @@ async def cmd_help(message: types.Message) -> None:
         "/troubleshoot - Resolve common issues\n"
         "/reqaddword - Request addition of words\n"
         "/feedback - Send feedback to bot owner\n\n"
-        "You may message [Jono](tg://user?id=463998526) "
-        "in *English / Cantonese* if you have issues with the bot.\n"
-        "Official Group: https://t.me/+T30aTNo-2Xx2kc52\n"
-        "Word Additions Channel (with status updates): @on9wcwa\n"
-        "Source Code: [jonowo/on9wordchainbot](https://github.com/jonowo/on9wordchainbot)\n"
-        "Epic icon designed by [Adri](tg://user?id=303527690)"
+        "You may message [Aswin](tg://user?id=1385954194) "
+        "in *English / Tamil* if you have issues with the bot.\n"
     )
 
 
@@ -78,10 +75,10 @@ async def cmd_troubleshoot(message: types.Message) -> None:
             "3. Someone spammed commands in your group recently "
             "\u27a1\ufe0f The bot is rate limited in your group, wait patiently\n"
             "4. The bot does not respond to <code>/ping</code> "
-            "\u27a1\ufe0f The bot is likely offline, check @on9wcwa for status updates\n\n"
+            "\u27a1\ufe0f The bot is likely offline, check with @Aswin4122001 for status updates\n\n"
             "<b>If the bot cannot be added to your group</b>:\n"
             "1. There can be at most 20 bots in a group. Check if this limit is reached.\n\n"
-            "If you encounter other issues, please contact <a href='tg://user?id=463998526'>my owner</a>."
+            "If you encounter other issues, please contact <a href='tg://user?id=1385954194'>my owner</a>."
         ),
         parse_mode=ParseMode.HTML,
     )
@@ -109,6 +106,7 @@ async def cmd_runinfo(message: types.Message) -> None:
     )
     uptime = datetime.now().replace(microsecond=0) - GlobalState.build_time
     await message.reply(
+        f"Welcome!\nThis game bot has been made by my boss @Aswin4122001\n"
         f"Build time: `{build_time_str}`\n"
         f"Uptime: `{uptime.days}.{str(uptime).rsplit(maxsplit=1)[-1]}`\n"
         f"Words in dictionary: `{Words.count}`\n"
@@ -118,7 +116,8 @@ async def cmd_runinfo(message: types.Message) -> None:
     )
 
 
-@router.message(IsOwner(), Command("playinggroups"))
+@router.message(Command("playinggroups"))
+@admin_only
 async def cmd_playinggroups(message: types.Message) -> None:
     if not GlobalState.games:
         await message.reply("No groups are playing games.")

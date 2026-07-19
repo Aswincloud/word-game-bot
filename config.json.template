@@ -8,5 +8,7 @@
     "OFFICIAL_GROUP_ID": 69420,
     "WORD_ADDITION_CHANNEL_ID": 69420,
     "VIP": [],
-    "VIP_GROUP": []
+    "VIP_GROUP": [],
+    "AUTHORIZED_ID": [],
+    "ADMIN_ID": []
 }

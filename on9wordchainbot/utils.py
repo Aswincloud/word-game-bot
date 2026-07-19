@@ -5,8 +5,9 @@ from typing import Any, Awaitable, Callable, Coroutine, Optional, TypeVar
 
 from aiocache import cached
 from aiogram import types
+from aiogram.enums import ParseMode
 
-from on9wordchainbot.constants import ADMIN_GROUP_ID, VIP
+from on9wordchainbot.constants import ADMIN_GROUP_ID, VIP, AUTHORIZED_ID
 from on9wordchainbot.resources import bot, on9bot, get_pool
 from on9wordchainbot.words import Words
 
@@ -71,10 +72,10 @@ def inline_keyboard_from_button(button: types.InlineKeyboardButton) -> types.Inl
 
 
 ADD_TO_GROUP_KEYBOARD = inline_keyboard_from_button(
-    types.InlineKeyboardButton(text="Add to group", url="https://t.me/on9wordchainbot?startgroup=_")
+    types.InlineKeyboardButton(text="Add to group", url="https://t.me/gamebotbyashbot?startgroup=_")
 )
 ADD_ON9BOT_TO_GROUP_KEYBOARD = inline_keyboard_from_button(
-    types.InlineKeyboardButton(text="Add On9Bot to group", url="https://t.me/On9Bot?startgroup=_")
+    types.InlineKeyboardButton(text="Add Ash helper bot to group", url="https://t.me/gamebotbyashbot?startgroup=_")
 )
 
 
@@ -92,12 +93,22 @@ def send_private_only_message(f: Callable[..., Any]) -> Callable[..., Any]:
 def send_groups_only_message(f: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(f)
     async def inner(message: types.Message, *args: Any, **kwargs: Any) -> None:
-        if message.chat.id > 0:
+        if message.chat.id > 0:  # If it's a private chat
             await message.reply(
-                "This command can only be used in groups.",
+                "🚫 This command can only be used in groups.",
                 reply_markup=ADD_TO_GROUP_KEYBOARD
             )
             return
+
+        # Fork-specific: check if the group is authorized
+        if message.chat.id not in AUTHORIZED_ID:
+            await message.reply(
+                f"⛔ This group is not authorized to use this command.\n"
+                f"Please contact my boss @Aswin4122001 to authorize this group: `{message.chat.id}`",
+                parse_mode=ParseMode.MARKDOWN,
+            )
+            return
+
         await f(message, *args, **kwargs)
 
     return inner

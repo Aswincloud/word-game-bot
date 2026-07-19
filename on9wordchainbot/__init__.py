@@ -6,6 +6,7 @@ from periodic import Periodic
 from on9wordchainbot.resources import init_resources, close_resources
 from on9wordchainbot.utils import send_admin_group
 from on9wordchainbot.words import Words
+from on9wordchainbot.constants import load_authorized_ids
 
 try:
     import coloredlogs
@@ -36,8 +37,9 @@ dp.error.register(error_handler)
 @dp.startup()
 async def startup():
     await init_resources()
-    await Periodic(60 * 60, Words.update).start(delay=0)  # Run Words.update every hour
-    await send_admin_group("Bot starting.")
+    await load_authorized_ids()  # Fork-specific: load DB-backed admin/authorized-group IDs
+    await Periodic(3 * 60 * 60, Words.update).start(delay=0)  # Run Words.update every 3 hours
+    await send_admin_group("🚀 Bot is up and running!")
 
 @dp.shutdown()
 async def shutdown():

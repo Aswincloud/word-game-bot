@@ -3,7 +3,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Filter
 from aiogram.utils.chat_member import ADMINS
 
-from on9wordchainbot.constants import OWNER_ID, VIP
+from on9wordchainbot.constants import OWNER_ID, VIP, ADMIN_ID
 from on9wordchainbot.resources import GlobalState
 
 
@@ -19,7 +19,9 @@ class IsVIP(Filter):
 
 class IsAdmin(Filter):
     async def __call__(self, message: types.Message) -> bool:
-        if message.from_user.id == OWNER_ID:
+        # Fork-specific: owner and DB-backed admins are always admins.
+        # (ADMIN_ID is a list; original v2 code used `== ADMIN_ID` which never matched.)
+        if message.from_user.id == OWNER_ID or message.from_user.id in ADMIN_ID:
             return True
 
         try:

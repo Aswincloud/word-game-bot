@@ -46,3 +46,13 @@ CREATE TABLE wordlist (
     accepted BOOLEAN NOT NULL,
     reason TEXT
 );
+
+-- Fork-specific: DB-backed access control (queried by load_authorized_ids()
+-- and written by /authorize and /demote in handlers/misc.py).
+CREATE TABLE admin_id (
+    user_id BIGINT PRIMARY KEY
+);
+
+CREATE TABLE authorized_id (
+    group_id BIGINT PRIMARY KEY
+);

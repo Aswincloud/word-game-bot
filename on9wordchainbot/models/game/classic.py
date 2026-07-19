@@ -28,7 +28,7 @@ class ClassicGame:
         "group_id", "players", "players_in_game", "state", "start_time", "end_time",
         "extended_user_ids", "min_players", "max_players", "time_left", "time_limit",
         "min_letters_limit", "current_word", "longest_word", "longest_word_sender_id",
-        "answered", "accepting_answers", "turns", "used_words", "join_lock"
+        "answered", "accepting_answers", "turns", "used_words", "join_lock", "timer_message"
     )
 
     def __init__(self, group_id: int) -> None:
@@ -58,6 +58,7 @@ class ClassicGame:
         self.used_words: set[str] = set()
 
         self.join_lock = asyncio.Lock()  # Prevent same user / vp joining as multiple players
+        self.timer_message = None
 
     def user_in_game(self, user_id: int) -> bool:
         return any(p.user_id == user_id for p in self.players)
@@ -325,7 +326,13 @@ class ClassicGame:
             ),
             parse_mode=ParseMode.HTML
         )
-
+        if self.turns==50:
+            await self.send_message(
+                (
+                    f"50 words reached. Great 🔥"
+                ),
+                parse_mode=ParseMode.HTML
+            )
         # Reset per-turn attributes
         self.answered = False
         self.accepting_answers = True
@@ -462,9 +469,31 @@ class ClassicGame:
             self.players_in_game.append(self.players_in_game.pop(0))
         else:
             self.time_left -= 1
+            if self.time_left == 20:
+                await self.send_message(
+                    "20 seconds left!",
+                    parse_mode=ParseMode.HTML
+                )
+            elif self.time_left == 15:
+                await self.send_message(
+                    "15 seconds left!",
+                    parse_mode=ParseMode.HTML
+                )
+            elif self.time_left == 10:
+                self.timer_message = await self.send_message(
+                    f"⏳ {self.time_left} seconds left!",
+                    parse_mode=ParseMode.HTML
+                )
+            elif self.time_left < 10 and hasattr(self, "timer_message"):
+                HOURGLASS_FRAMES = ["⏳", "⌛"]
+                emoji = HOURGLASS_FRAMES[self.time_left % 2]
+                await self.timer_message.edit_text(
+                    text=f"{emoji} {self.time_left} seconds left!",
+                    parse_mode=ParseMode.HTML
+                )
             if self.time_left > 0:
                 return False
-
+            
             # Timer ran out
             self.accepting_answers = False
             await self.send_message(
@@ -492,7 +521,8 @@ class ClassicGame:
         if self.longest_word:
             longest_word_sender_name = [p for p in self.players if p.user_id == self.longest_word_sender_id][0].name
             text += f"Longest word: <i>{self.longest_word.capitalize()}</i> from {longest_word_sender_name}\n"
-        text += f"Game length: <code>{game_len_str}</code>"
+        text += f"Game length: <code>{game_len_str}</code>\n"
+        text += f"Thanks for using the bot made by Ash! @Aswin4122001"
         await self.send_message(text, parse_mode=ParseMode.HTML)
 
         GlobalState.games.pop(self.group_id, None)

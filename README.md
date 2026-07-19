@@ -1,14 +1,14 @@
-# On9 Word Chain Bot
-![On9 Word Chain Bot logo](https://i.imgur.com/B4hjMC5.jpg)
+# Word Game Bot
 
-(Epic icon by [@AdriTheDreamer](https://github.com/AdriTheDreamer)) 
+Word Game Bot hosts games of word chain in Telegram groups.
 
-On9 Word Chain Bot hosts games of word chain in Telegram groups.
+Maintained by [Aswin](https://t.me/Aswin4122001). This is a fork of
+[jonowo/on9wordchainbot](https://github.com/jonowo/on9wordchainbot), migrated to
+aiogram v3 and extended with a database-backed admin and group-authorization system.
 
 ### Telegram Links
-- [On9 Word Chain Bot](https://t.me/on9wordchainbot) (Live Version)
-- [Official Group](https://t.me/+T30aTNo-2Xx2kc52)
-- [Word Additions Channel](https://t.me/on9wcwa)
+- [Word Game Bot](https://t.me/gamebotbyashbot) (Live Version)
+- Contact the maintainer: [@Aswin4122001](https://t.me/Aswin4122001)
 
 ## Installation
 
@@ -17,7 +17,7 @@ Python 3.10+ \
 PostgreSQL 11+ \
 2 Telegram bots
 
-> It is highly recommended that you turn off privacy mode for On9 Word Chain Bot via @BotFather,
+> It is highly recommended that you turn off privacy mode for the bot via @BotFather,
 > which is on by default. Otherwise, leaving privacy mode on, the bot will only receive players'
 > answers when they reply to the bot.
 
